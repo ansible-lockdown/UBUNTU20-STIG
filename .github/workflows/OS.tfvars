@@ -1,9 +1,9 @@
-#Ami Alma 9
-ami_id        = "ami-0845395779540e3cb"
-ami_os        = "rhel9"
-ami_username  = "ec2-user"
-ami_user_home = "/home/ec2-user"
+#Ami Ubuntu 20
+ami_id        = "ami-05fe5907b25984493"
+ami_os        = "ubuntu20"
+ami_username  = "ubuntu"
+ami_user_home = "/home/ubuntu"
 instance_tags = {
-  Name        = "RHEL9-CIS"
-  Environment = "lockdown_github_repo_workflow"
+  Name        = "UBUNTU20-STIG"
+  Environment = "Ansible_Lockdown_GH_PR_Pipeline"
 }
