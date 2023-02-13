@@ -1,0 +1,21 @@
+
+# This is the workflow to update the Ansible Galaxy space for this role on a merge to the main branch (a new release)
+
+name: update_galaxy
+
+# Controls when the action will run.
+# Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_role:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hspaans/ansible-galaxy-action@master
+        with:
+          api_key: ${{ secrets.GALAXY_API_KEY }}
