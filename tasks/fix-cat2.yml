@@ -954,7 +954,7 @@
           "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Find Files."
           "MEDIUM | UBTU-20-010123 | PATCH | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Find Files."
           "MEDIUM | UBTU-20-010124 | PATCH | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Find Files."
-        shell: sudo find {{ubtu_20_audit_log_path.stdout }} -type f
+        shell: sudo find {{ ubtu_20_audit_log_path.stdout }} -type f
         changed_when: false
         failed_when: false
         register: ubtu_20_audit_log_files
