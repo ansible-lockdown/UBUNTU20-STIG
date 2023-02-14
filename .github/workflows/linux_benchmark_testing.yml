@@ -82,7 +82,6 @@ jobs:
         run: cat hosts.yml
 
 # Aws deployments taking a while to come up insert sleep or playbook fails
-
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
