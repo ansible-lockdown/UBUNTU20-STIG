@@ -2,7 +2,7 @@
 
 ubtu20stig_report_dir: /tmp
 
-ubtu20stig_cat1_patch: true
+ubtu20stig_cat1_patch: false
 ubtu20stig_cat2_patch: true
 ubtu20stig_cat3_patch: true
 
@@ -59,29 +59,29 @@ ubtu_20_010462: true
 ubtu_20_010463: true
 
 # CAT 2 Rules
-ubtu_20_010000: true
-ubtu_20_010002: true
-ubtu_20_010003: true
-ubtu_20_010004: true
-ubtu_20_010005: true
-ubtu_20_010010: true
-ubtu_20_010013: true
-ubtu_20_010014: true
-ubtu_20_010016: true
-ubtu_20_010033: true
-ubtu_20_010035: true
-ubtu_20_010036: true
-ubtu_20_010037: true
-ubtu_20_010038: true
-ubtu_20_010043: true
-ubtu_20_010044: true
-ubtu_20_010045: true
-ubtu_20_010049: true
-ubtu_20_010054: true
-ubtu_20_010056: true
+ubtu_20_010000: false
+ubtu_20_010002: false
+ubtu_20_010003: false
+ubtu_20_010004: false
+ubtu_20_010005: false
+ubtu_20_010010: false
+ubtu_20_010013: false
+ubtu_20_010014: false
+ubtu_20_010016: false
+ubtu_20_010033: false
+ubtu_20_010035: false
+ubtu_20_010036: false
+ubtu_20_010037: false
+ubtu_20_010038: false
+ubtu_20_010043: false
+ubtu_20_010044: false
+ubtu_20_010045: false
+ubtu_20_010049: false
+ubtu_20_010054: false
+ubtu_20_010056: false
 # Task ubtu_20_010057 is before ubtu_20_010054 in playbook
 # because of package install check.
-ubtu_20_010057: true
+ubtu_20_010057: false
 # Task ubtu_20_010060 is after ubtu_20_010064 in playbook
 # because of package install requirements.
 ubtu_20_010060: true
@@ -89,138 +89,138 @@ ubtu_20_010063: true
 ubtu_20_010064: true
 ubtu_20_010065: true
 ubtu_20_010066: true
-ubtu_20_010074: true
-ubtu_20_010100: true
-ubtu_20_010101: true
-ubtu_20_010102: true
-ubtu_20_010103: true
-ubtu_20_010104: true
-ubtu_20_010117: true
-ubtu_20_010118: true
-ubtu_20_010122: true
-ubtu_20_010123: true
-ubtu_20_010124: true
-ubtu_20_010128: true
-ubtu_20_010133: true
-ubtu_20_010134: true
-ubtu_20_010135: true
-ubtu_20_010136: true
-ubtu_20_010137: true
-ubtu_20_010138: true
-ubtu_20_010139: true
-ubtu_20_010140: true
-ubtu_20_010141: true
-ubtu_20_010142: true
-ubtu_20_010148: true
-ubtu_20_010152: true
-ubtu_20_010155: true
-ubtu_20_010161: true
-ubtu_20_010162: true
-ubtu_20_010163: true
-ubtu_20_010164: true
-ubtu_20_010165: true
-ubtu_20_010166: true
-ubtu_20_010167: true
-ubtu_20_010168: true
-ubtu_20_010169: true
-ubtu_20_010170: true
-ubtu_20_010171: true
-ubtu_20_010172: true
-ubtu_20_010173: true
-ubtu_20_010174: true
-ubtu_20_010175: true
-ubtu_20_010176: true
-ubtu_20_010177: true
-ubtu_20_010178: true
-ubtu_20_010179: true
-ubtu_20_010181: true
-ubtu_20_010182: true
-ubtu_20_010198: true
-ubtu_20_010199: true
-ubtu_20_010200: true
-ubtu_20_010201: true
-ubtu_20_010205: true
-ubtu_20_010211: true
-ubtu_20_010244: true
-ubtu_20_010267: true
-ubtu_20_010277: true
-ubtu_20_010278: true
-ubtu_20_010279: true
-ubtu_20_010296: true
-ubtu_20_010297: true
-ubtu_20_010298: true
-ubtu_20_010403: true
-ubtu_20_010404: true
-ubtu_20_010407: true
-ubtu_20_010408: true
-ubtu_20_010409: true
-ubtu_20_010411: true
-ubtu_20_010412: true
-ubtu_20_010413: true
-ubtu_20_010414: true
-ubtu_20_010416: true
-ubtu_20_010417: true
-ubtu_20_010418: true
-ubtu_20_010419: true
-ubtu_20_010420: true
-ubtu_20_010421: true
-ubtu_20_010422: true
-ubtu_20_010423: true
-ubtu_20_010424: true
-ubtu_20_010425: true
-ubtu_20_010426: true
-ubtu_20_010427: true
-ubtu_20_010428: true
-ubtu_20_010429: true
-ubtu_20_010430: true
-ubtu_20_010431: true
-ubtu_20_010432: true
-ubtu_20_010433: true
-ubtu_20_010434: true
-ubtu_20_010435: true
-ubtu_20_010437: true
-ubtu_20_010438: true
-ubtu_20_010439: true
-ubtu_20_010440: true
-ubtu_20_010443: true
-ubtu_20_010444: true
-ubtu_20_010445: true
-ubtu_20_010446: true
-ubtu_20_010447: true
-ubtu_20_010448: true
-ubtu_20_010449: true
-ubtu_20_010450: true
-ubtu_20_010451: true
-ubtu_20_010454: true
-ubtu_20_010455: true
-ubtu_20_010456: true
-ubtu_20_010457: true
-ubtu_20_010458: true
-ubtu_20_010461: true
+ubtu_20_010074: false
+ubtu_20_010100: false
+ubtu_20_010101: false
+ubtu_20_010102: false
+ubtu_20_010103: false
+ubtu_20_010104: false
+ubtu_20_010117: false
+ubtu_20_010118: false
+ubtu_20_010122: false
+ubtu_20_010123: false
+ubtu_20_010124: false
+ubtu_20_010128: false
+ubtu_20_010133: false
+ubtu_20_010134: false
+ubtu_20_010135: false
+ubtu_20_010136: false
+ubtu_20_010137: false
+ubtu_20_010138: false
+ubtu_20_010139: false
+ubtu_20_010140: false
+ubtu_20_010141: false
+ubtu_20_010142: false
+ubtu_20_010148: false
+ubtu_20_010152: false
+ubtu_20_010155: false
+ubtu_20_010161: false
+ubtu_20_010162: false
+ubtu_20_010163: false
+ubtu_20_010164: false
+ubtu_20_010165: false
+ubtu_20_010166: false
+ubtu_20_010167: false
+ubtu_20_010168: false
+ubtu_20_010169: false
+ubtu_20_010170: false
+ubtu_20_010171: false
+ubtu_20_010172: false
+ubtu_20_010173: false
+ubtu_20_010174: false
+ubtu_20_010175: false
+ubtu_20_010176: false
+ubtu_20_010177: false
+ubtu_20_010178: false
+ubtu_20_010179: false
+ubtu_20_010181: false
+ubtu_20_010182: false
+ubtu_20_010198: false
+ubtu_20_010199: false
+ubtu_20_010200: false
+ubtu_20_010201: false
+ubtu_20_010205: false
+ubtu_20_010211: false
+ubtu_20_010244: false
+ubtu_20_010267: false
+ubtu_20_010277: false
+ubtu_20_010278: false
+ubtu_20_010279: false
+ubtu_20_010296: false
+ubtu_20_010297: false
+ubtu_20_010298: false
+ubtu_20_010403: false
+ubtu_20_010404: false
+ubtu_20_010407: false
+ubtu_20_010408: false
+ubtu_20_010409: false
+ubtu_20_010411: false
+ubtu_20_010412: false
+ubtu_20_010413: false
+ubtu_20_010414: false
+ubtu_20_010416: false
+ubtu_20_010417: false
+ubtu_20_010418: false
+ubtu_20_010419: false
+ubtu_20_010420: false
+ubtu_20_010421: false
+ubtu_20_010422: false
+ubtu_20_010423: false
+ubtu_20_010424: false
+ubtu_20_010425: false
+ubtu_20_010426: false
+ubtu_20_010427: false
+ubtu_20_010428: false
+ubtu_20_010429: false
+ubtu_20_010430: false
+ubtu_20_010431: false
+ubtu_20_010432: false
+ubtu_20_010433: false
+ubtu_20_010434: false
+ubtu_20_010435: false
+ubtu_20_010437: false
+ubtu_20_010438: false
+ubtu_20_010439: false
+ubtu_20_010440: false
+ubtu_20_010443: false
+ubtu_20_010444: false
+ubtu_20_010445: false
+ubtu_20_010446: false
+ubtu_20_010447: false
+ubtu_20_010448: false
+ubtu_20_010449: false
+ubtu_20_010450: false
+ubtu_20_010451: false
+ubtu_20_010454: false
+ubtu_20_010455: false
+ubtu_20_010456: false
+ubtu_20_010457: false
+ubtu_20_010458: false
+ubtu_20_010461: false
 
 # CAT 3 Rules
-ubtu_20_010007: true
-ubtu_20_010008: true
-ubtu_20_010050: true
-ubtu_20_010051: true
-ubtu_20_010052: true
-ubtu_20_010053: true
-ubtu_20_010055: true
-ubtu_20_010070: true
-ubtu_20_010072: true
-ubtu_20_010075: true
-ubtu_20_010215: true
-ubtu_20_010216: true
-ubtu_20_010217: true
-ubtu_20_010230: true
-ubtu_20_010300: true
-ubtu_20_010400: true
-ubtu_20_010410: true
-ubtu_20_010415: true
-ubtu_20_010436: true
-ubtu_20_010441: true
-ubtu_20_010453: true
-ubtu_20_010401: true
+ubtu_20_010007: false
+ubtu_20_010008: false
+ubtu_20_010050: false
+ubtu_20_010051: false
+ubtu_20_010052: false
+ubtu_20_010053: false
+ubtu_20_010055: false
+ubtu_20_010070: false
+ubtu_20_010072: false
+ubtu_20_010075: false
+ubtu_20_010215: false
+ubtu_20_010216: false
+ubtu_20_010217: false
+ubtu_20_010230: false
+ubtu_20_010300: false
+ubtu_20_010400: false
+ubtu_20_010410: false
+ubtu_20_010415: false
+ubtu_20_010436: false
+ubtu_20_010441: false
+ubtu_20_010453: false
+ubtu_20_010401: false
 
 # ubtu20stig_desktop_required is the toggle to turn on desktop related controls
 # value of true will run tasks that are intended for the desktop, false will skip desktop related controls
@@ -231,7 +231,7 @@ ubtu20stig_ssh_required: true
 
 # Service configuration variables, set to true to keep service
 ubtu20stig_nis_required: false
-ubtu20stig_rsh_required: false
+ubtu20stig_rshserver_required: false
 ubtu20stig_telnet_required: false
 
 # ubt20stig_int_gid is the interactive user gid
@@ -244,6 +244,10 @@ ubtu20stig_kdump_needed: false
 
 # CAT 1
 # UBTU-20-010012
+# ubtu20stig_sudo_group_name is the variable to place your custom name for your sudo group.
+# If you do not have a custom sudo group name leave as default.
+ubtu20stig_sudo_group_name: sudo
+
 # ubtu20_allowed_sudoers is the list of users who should be in the sudoers group
 # With this enabled all other users will be removed from the sudoers group
 ubtu20_allowed_sudoers:
@@ -255,6 +259,7 @@ ubtu20_auto_remove_sudoers: true
 
 
 # Cat 2
+# UBTU-20-010000
 # ubtu20_temp_accounts is the list of temporary accounts that are known and will have a
 # expiration time of 72 hours. If no warning is displayed at the end of the playbook for this control, the control worked.
 # ubtu20_temp_account: "none" setting in variable will not run the control to adjust the accounts and will
@@ -324,6 +329,7 @@ ubtu20stig_sshd:
 
 # UBTU-20-010054
 # UNTU-20-010056
+# ubtu20stig_password_complexity.minlen setting should be 15 to meet STIG requirements.
 # Password complexity settings
 ubtu20stig_password_complexity:
     # ucredit: -1
@@ -349,13 +355,6 @@ ubtu20stig_pamd_retry:
     control: requisite
     module_path: pam_deny.so
     state: after
-
-# UBTU-20-010060
-# ubtu20stig_cert_policy is the settings that will be appled to the default pkcs11 module for cert policies.
-# If you are required to have other options please add them to this line.  This control repalces the entire line.
-# For it to be STIG compliant ca must be be in the default cert_policy.
-# Example: cert_policy = ca,signature,ocsp_on
-ubtu20stig_cert_policy: ca
 
 # UBTU-20-010066
 # ubtu20stig_crl_setting_cert_policy is the setting that will be applied to all cert_policy lines that are
@@ -385,8 +384,8 @@ ubtu20stig_auditd_disk_full_action: HALT
 
 # UBTU-20-010122
 # ubtu20stig_audit_log is the permissions value on all files in the audit logs folder, /var/logs/audit by default
-# To conform to STIG standards this needs to be 600 or more restrictive
-ubtu20stig_audit_log_files_permissions: 600
+# To conform to STIG standards this needs to be 0600 or less permissive
+ubtu20stig_audit_log_files_permissions: 0600
 
 # UBTU-20-010128
 # ubtu20stig_audit_log_dirs_mode is the permissions value on the audit logs folder, var/logs/audit by default
@@ -394,14 +393,20 @@ ubtu20stig_audit_log_files_permissions: 600
 ubtu20stig_audit_log_dir_permission: 0750
 
 # UBTU-20-010133
-# ubtu20stig_audit_file_mode is the permissions value on all files in the /etc/audit/audit.rule","/etc/audit/rules.d/*", or "/etc/audit/auditd.conf
-# To conform to STIG standards this needs to be 640 or less permissive
-ubtu20stig_audit_file_permissions: 640
+# ubtu20stig_audit_file_permissions is the permissions value on all files in the /etc/audit/audit.rule","/etc/audit/rules.d/*", or "/etc/audit/auditd.conf
+# To conform to STIG standards this needs to be 0640 or less permissive
+ubtu20stig_audit_file_permissions: 0640
 
+# UBTU-20-010199
 # ubtu20stig_tool_perms is the permissions set to the /sbin/auditctl, /sbin/aureport,
 # /sbin/ausearch, /sbin/autrace, /sbin/auditd, /sbin/audispd, /sbin/augenrules tools
 # To conform to STIG standards this needs to be 0755 or more restrictive
-ubtu20stig_tool_perms: 755
+ubtu20stig_audit_tool_permissions: 0755
+
+# UBTU-20-010205
+# ubtu20stig_cryptographic_mechanisms is the default STIG setting to conform to standards.
+# This variable is here as option for easier chamge later on if the STIG control changes.
+ubtu20stig_cryptographic_mechanisms: p+i+n+u+g+s+b+acl+xattrs+sha512
 
 # UBTU-20-010404
 # ubtu20stig_pamd_encryption are the pam_unix settings related to setting the encryption schema for logins.
@@ -430,30 +435,36 @@ ubtu20stig_login_defaults:
 # To conform to STIG standards this needs to be 35 or less, but greater than 0
 ubtu20stig_useradd_active: 35
 
-# UBTU-20-010417
+# UBTU-20-010416
+# ubtu20stig_var_log_file_perms is the permissions on the /var/log files
+# excluding btmp, wtmp, and lastlog files
+# To conform to STIG starndards this needs to be 0640 or more restrictive
+ubtu20stig_var_log_file_perms: 0640
+
+# UBTU-20-010419
 # ubtu20stig_var_log_perms is the permissions on the /var/log directory
 # To conform to STIG starndards this needs to be 0755 or more restrictive
-ubtu20stig_var_log_perms: 755
+ubtu20stig_var_log_perms: 0755
 
 # UBTU-20-010422
 # ubtu20stig_var_log_syslog_perms is the permissions on the /var/log/syslog file
 # To conform to STIG standards this needs to be 0640 or more restrictive
-ubtu20stig_var_log_syslog_perms: 640
+ubtu20stig_var_log_syslog_perms: 0640
 
 # UBUT-20-010423
 # ubtu20stig_sys_comm_dir_perms are the permissions to put on the OS system commands directories if they are found to be less restrictive than 755
-# To conform to STIG standards this value needs to be 755 or more restrictive
-ubtu20stig_sys_comm_dir_perms: 755
+# To conform to STIG standards this value needs to be 0755 or more restrictive
+ubtu20stig_sys_comm_dir_perms: 0755
 
 # UBTU-20-010426
 # ubtu20stig_lib_file_perms are the perms to put on all library files if they are found be less restrictive than 755
-# To conform to STIG standards this value needs to be 755 or more restrictive
-ubtu20stig_lib_file_perms: 755
+# To conform to STIG standards this value needs to be 0755 or more restrictive
+ubtu20stig_lib_file_perms: 0755
 
 # UBTU-20-010427
 # ubtu20stig_lib_dir_perms are the perms to put on the library directories if they are found to be less restrictive than 755
 # To conform to STIG standards this value needs to be 755 or more restrictive
-ubtu20stig_lib_dir_perms: 755
+ubtu20stig_lib_dir_perms: 0755
 
 # UBTU-20-010435
 # ubtu20stig_iburst_maxpoll_value is the maximum interval between requests sent to the server
@@ -616,6 +627,7 @@ ubtu20_emergency_account: "none"
 # UBTU-20-010436
 # ubtu20stig_chrony will be all of the settings needed for chrony
 # makestep is the value for the chrony makestep threshhold limit
+# To be Stig complaint the values 1 -1 must be below.
 ubtu20stig_chrony:
     makestep: "1 -1"
 

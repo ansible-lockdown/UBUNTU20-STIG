@@ -3,7 +3,8 @@
 - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less."
   block:
       - name: "MEDIUM | UBTU-20-010000 | PATCH | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Set Accounts To 72 Hour Terminate."
-        shell: sudo chage -E $(date -d "+3 days" +%F) {{ item }}
+        shell: chage -E $(date -d "+3 days" +%F) {{ item }}
+        become: true
         changed_when: false
         failed_when: false
         with_items: "{{ ubtu20_temp_account }}"
@@ -191,13 +192,15 @@
 - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles."
   block:
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Get sudoers nopasswd files"
-        shell: egrep -i '(nopasswd)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        shell: grep -Ei '(nopasswd)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010014_sudoers_nopasswd_status
 
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Get sudoers authenticate files"
-        shell: egrep -i '(!authenticate)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        shell: grep -Ei '(!authenticate)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010014_sudoers_authenticate_status
@@ -269,7 +272,7 @@
       - name: "MEDIUM | UBTU-20-010033 | PATCH | The Ubuntu operating system must implement smart card logins for multifactor authentication for local and network access to privileged and non-privileged accounts. | Adjust PublicKeyAuth In ssh_config."
         lineinfile:
             path: /etc/ssh/sshd_config
-            regexp: '^PubkeyAuthentication |^#PubkeyAuthentication '
+            regexp: '^#?\s*PubkeyAuthentication'
             line: "PubkeyAuthentication yes"
         notify: restart sshd
   when:
@@ -290,7 +293,7 @@
 - name: "MEDIUM | UBTU-20-010035 | PATCH | The Ubuntu operating system must use strong authenticators in establishing nonlocal maintenance and diagnostic sessions."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^UsePAM |^#UsePAM '
+      regexp: '^#?\s*UsePAM'
       line: "UsePAM yes"
   notify: restart sshd
   when:
@@ -307,7 +310,7 @@
 - name: "MEDIUM | UBTU-20-010036 | PATCH | The Ubuntu operating system must immediately terminate all network connections associated with SSH traffic after a period of inactivity."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^ClientAliveCountMax |^#ClientAliveCountMax '
+      regexp: '^#?\s*ClientAliveCountMax'
       line: "ClientAliveCountMax 1"
   notify: restart sshd
   when:
@@ -324,7 +327,7 @@
 - name: "MEDIUM | UBTU-20-010037 | PATCH | The Ubuntu operating system must automatically terminate all network connections associated with SSH traffic at the end of the session or after 10 minutes of inactivity."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^ClientAliveInterval |^#ClientAliveInterval '
+      regexp: '^#?\s*ClientAliveInterval'
       line: "ClientAliveInterval {{ ubtu20stig_sshd.client_alive_interval }}"
   notify: restart sshd
   when:
@@ -358,6 +361,23 @@
         notify: restart sshd
         with_items:
             - /etc/issue.net
+
+      - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Comment Out Default MOTD Info Out."
+        lineinfile:
+            path: /etc/pam.d/sshd
+            regexp: "{{ item.regexp }}"
+            line: "{{ item.line }}"
+        notify: restart sshd
+        with_items:
+            - { regexp: '.*session.*optional.*pam_motd.so.*motd.*', line: '# session    optional     pam_motd.so  motd=/run/motd.dynamic' }
+            - { regexp: '.*session.*optional.*pam_motd.so.*noupdate', line: '# session    optional     pam_motd.so noupdate' }
+
+      - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Comment Out And Set To Off PrintLastLog."
+        lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: '^#?\s*PrintLastLog'
+            line: "#PrintLastLog no"
+        notify: restart sshd
   when:
       - ubtu_20_010038
       - ubtu20stig_ssh_required
@@ -398,7 +418,7 @@
 - name: "MEDIUM | UBTU-20-010044 | PATCH | The Ubuntu operating system must configure the SSH daemon to use FIPS 140-2 approved ciphers to prevent the unauthorized disclosure of information and/or detect changes to information during transmission."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^Ciphers|^#Ciphers'
+      regexp: '^#?\s*Ciphers'
       line: "Ciphers {{ ubtu20stig_sshd.ciphers }}"
       insertbefore: '^# Ciphers and keying'
   notify: restart sshd
@@ -419,7 +439,7 @@
 - name: "MEDIUM | UBTU-20-010049 | PATCH | The Ubuntu operating system SSH daemon must prevent remote hosts from connecting to the proxy display."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^X11UseLocalhost '
+      regexp: '^#?\s*X11UseLocalhost'
       line: "X11UseLocalhost yes"
   when:
       - ubtu_20_010049
@@ -473,7 +493,7 @@
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Set the enforcing setting"
         lineinfile:
             path: /etc/security/pwquality.conf
-            regexp: '^enforcing =|^#.*enforcing ='
+            regexp: '^#?\s*enforcing'
             line: 'enforcing = 1'
   when:
       - ubtu_20_010057
@@ -492,7 +512,7 @@
   lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*minlen'
-      line: "minlen = {{ ubtu20stig_password_complexity.minlen | default('15') }}"
+      line: "minlen = {{ ubtu20stig_password_complexity.minlen }}"
       create: true
       owner: root
       group: root
@@ -511,8 +531,8 @@
 - name: "MEDIUM | UBTU-20-010056 | PATCH | The Ubuntu operating system must prevent the use of dictionary words for passwords."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^dictcheck =|^#.*dictcheck ='
-      line: 'dictcheck={{ ubtu20stig_password_complexity.dictcheck }}'
+      regexp: '^#?\s*dictcheck'
+      line: 'dictcheck = {{ ubtu20stig_password_complexity.dictcheck }}'
       create: true
       owner: root
       group: root
@@ -571,23 +591,33 @@
         failed_when: false
         register: ubtu_20_010060_default_pkcs11_module_output
 
-      - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Replace if exists in pam_pkcs11.conf"
+      - name: "MEDIUM | UBTU-20-010060 | AUDIT | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Set_fact"
+        set_fact:
+            ubtu_20_010060_default_pkcs11_module_line: "{{ ubtu_20_010060_default_pkcs11_module_output.stdout | regex_search('.*cert_policy.*') | string }}"
+
+      - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Add Ca to line If not present."
+        replace:
+
+            path: "{{ pam_pkcs11_location.stdout }}"
+            regexp: '^(.*)none(.*)$'
+            replace: '\1ca\2'
+        when: "'none' in ubtu_20_010060_default_pkcs11_module_line"
+
+      - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Fix Commented out line and add ca."
         replace:
             path: "{{ pam_pkcs11_location.stdout }}"
-            regexp: '    cert_policy =.*'
-            replace: '    cert_policy = {{ ubtu20stig_cert_policy }};'
-            after: 'pkcs11_module default'
+            regexp: '#?\s*cert_policy.*'
+            replace: '  cert_policy = ca;'
+            after: 'pkcs11_module default {'
             before: '}'
-        when:
-            - "'cert_policy' in ubtu_20_010060_default_pkcs11_module_output.stdout"
-            - "'ca' not in ubtu_20_010060_default_pkcs11_module_output.stdout"
+        when: "'#' in ubtu_20_010060_default_pkcs11_module_line"
 
-      - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Insert if does not exist in pam_pkcs11.conf"
-        lineinfile:
-            path: "{{ ubtu_20_010060_pam_pkcs11_location.stdout }}"
-            line: '    cert_policy = {{ ubtu20stig_cert_policy }};'
-            insertafter: 'pkcs11_module default {\n'
-        when: "'cert_policy' not in ubtu_20_010060_default_pkcs11_module_output.stdout"
+      - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Line Already Exisits No Ca."
+        replace:
+            path: "{{ pam_pkcs11_location.stdout }}"
+            regexp: '(\s*cert_policy\s*= )(?!.*ca)(.*);'
+            replace: '\1ca,\2;'
+        when: "'ca' not in ubtu_20_010060_default_pkcs11_module_line"
   when:
       - ubtu_20_010060
   tags:
@@ -599,7 +629,7 @@
       - V-238229
       - certificates
 
-- name: "MEDIUM | UBTU-20-010065 | AUDIT | The Ubuntu operating system must electronically verify Personal Identity Verification (PIV) credentials."
+- name: "MEDIUM | UBTU-20-010065 | PATCH | The Ubuntu operating system must electronically verify Personal Identity Verification (PIV) credentials."
   replace:
       path: "{{ pam_pkcs11_location.stdout }}"
       regexp: '(\s*cert_policy\s*= )(?!.*ocsp_on)(.*);'
@@ -617,40 +647,41 @@
 
 - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network."
   block:
-      - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Check For Current Policy Setting."
-        shell: sudo grep cert_policy /etc/pam_pkcs11/pam_pkcs11.conf | grep "{{ ubtu20stig_crl_setting_cert_policy }}"
-        changed_when: false
-        failed_when: false
-        register: ubtu_20_010066_cert_policy_check
-
-      - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove Crl_auto when it does not match variable set."
+      - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove crl_auto when it does not match variable set."
         replace:
             path: "{{ pam_pkcs11_location.stdout }}"
-            regexp: 'crl_auto,'
+            regexp: '(crl_auto,|crl_auto)'
             replace: ''
-            after: '# use "none"'
+            after: '# use'
             before: '# Which'
         when:
             - "'crl_offline' in ubtu20stig_crl_setting_cert_policy"
-            - "'crl_offline' not in ubtu_20_010066_cert_policy_check.stdout | string"
 
-      - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove Crl_offline when it does not match variable set."
+      - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove crl_offline when it does not match variable set."
         replace:
             path: "{{ pam_pkcs11_location.stdout }}"
-            regexp: 'crl_offline,'
+            regexp: '(crl_offline,|crl_offline)'
             replace: ''
-            after: '# use "none"'
+            after: '# use'
             before: '# Which'
         when:
             - "'crl_auto' in ubtu20stig_crl_setting_cert_policy"
-            - "'crl_auto' not in ubtu_20_010066_cert_policy_check.stdout | string"
 
-      - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Update Policy."
+      - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Update Policy crl_auto."
         replace:
             path: "{{ pam_pkcs11_location.stdout }}"
-            regexp: '(\s*cert_policy\s*= )(?!.crl_auto|crl_offline)(.*);'
+            regexp: '(\s*cert_policy\s*= )(?!.*crl_auto)(.*);'
             replace: '\1{{ ubtu20stig_crl_setting_cert_policy }},\2;'
-        when: ubtu20stig_crl_setting_cert_policy not in ubtu_20_010066_cert_policy_check.stdout_lines | string
+        when:
+            - "'crl_auto' in ubtu20stig_crl_setting_cert_policy"
+
+      - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Update Policy crl_offline."
+        replace:
+            path: "{{ pam_pkcs11_location.stdout }}"
+            regexp: '(\s*cert_policy\s*= )(?!.*crl_offline)(.*);'
+            replace: '\1{{ ubtu20stig_crl_setting_cert_policy }},\2;'
+        when:
+            - "'crl_offline' in ubtu20stig_crl_setting_cert_policy"
   when:
       - ubtu_20_010066
   tags:
@@ -945,56 +976,93 @@
       - V-238244
       - auditd
 
+- name: "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users."
+  block:
+      - name: "MEDIUM | UBTU-20-010122 | AUDIT | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Get File Permissions."
+        shell: find {{ ubtu_20_audit_log_path.stdout }} -type f -perm -600 ! -perm 600
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010122_audit_log_files_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Adjust Aduit Log Files If Higher Then 0600."
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_audit_log_files_permissions }}"
+        with_items:
+            - "{{ ubtu_20_010122_audit_log_files_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010122_audit_log_files_permissions_audit.stdout | length > 0
+  when:
+      - ubtu_20_010122
+  tags:
+      - UBTU-20-010122
+      - CAT2
+      - CCI-000162
+      - CCI-000163
+      - SRG-OS-000057-GPOS-00027
+      - SV-238245r653910_rule
+      - V-238245
+      - auditd
+      - logs
+
 - name: |
-    "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users."
     "MEDIUM | UBTU-20-010123 | PATCH | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files."
     "MEDIUM | UBTU-20-010124 | PATCH | The Ubuntu operating system must permit only authorized groups ownership of the audit log files."
   block:
       - name: |
-          "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Find Files."
-          "MEDIUM | UBTU-20-010123 | PATCH | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Find Files."
-          "MEDIUM | UBTU-20-010124 | PATCH | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Find Files."
-        shell: sudo find {{ ubtu_20_audit_log_path.stdout }} -type f
+          "MEDIUM | UBTU-20-010123 | AUDIT | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Find Files."
+          "MEDIUM | UBTU-20-010124 | AUDIT | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Find Files."
+        shell: find {{ ubtu_20_audit_log_path.stdout }} -type f ! -user root -o -type f ! -group root
+        become: true
         changed_when: false
         failed_when: false
-        register: ubtu_20_audit_log_files
+        register: ubtu_20_010123_audit_log_files_root_permissions_audit
 
       - name: |
-          "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Set Permissions."
           "MEDIUM | UBTU-20-010123 | PATCH | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Set Permissions."
           "MEDIUM | UBTU-20-010124 | PATCH | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Set Permissions."
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010123 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010124 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010122 | ternary(ubtu20stig_audit_log_files_permissions,omit) }}"
-        with_items: "{{ ubtu_20_audit_log_files.stdout_lines }}"
+        with_items:
+            - "{{ ubtu_20_010123_audit_log_files_root_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010123_audit_log_files_root_permissions_audit.stdout | length > 0
   when:
-      - ubtu_20_010122 or
-        ubtu_20_010123 or
+      - ubtu_20_010123 or
         ubtu_20_010124
   tags:
-      - UBTU-20-010122
       - UBTU-20-010123
       - UBTU-20-010124
       - CAT2
       - CCI-000162
       - CCI-000163
       - SRG-OS-000057-GPOS-00027
-      - SV-238245r653910_rule
       - SV-238246r653913_rule
       - SV-238247r832947_rule
-      - V-238245
       - V-238246
       - V-238247
       - auditd
       - logs
 
-- name: "MEDIUM | UBTU-20-010128 | PATCH | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users. | Audit Log Mode 750."
-  file:
-      path: "{{ ubtu_20_audit_log_path.stdout }}"
-      mode: "{{ ubtu20stig_audit_log_dir_permission }}"
-      state: directory
+- name: "MEDIUM | UBTU-20-010128 | PATCH | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users."
+  block:
+      - name: "MEDIUM | UBTU-20-010128 | AUDIT | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users. | Find Log directory Permissions."
+        shell: find {{ ubtu_20_audit_log_path.stdout }} -type d -perm -750 ! -perm 750
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010128_audit_log_dir_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010128 | PATCH | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users. | Fix Log Directory Permissions."
+        file:
+            path: "{{ ubtu_20_audit_log_path.stdout }}"
+            mode: "{{ ubtu20stig_audit_log_dir_permission }}"
+            state: directory
+        when:
+            - ubtu_20_010128_audit_log_dir_permissions_audit.stdout | length > 0
   when:
       - ubtu_20_010128
   tags:
@@ -1007,45 +1075,69 @@
       - auditd
       - logs
 
+- name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users."
+  block:
+      - name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Create List."
+        shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f -perm -640 ! -perm 640
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010133_audit_config_files_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Set User Write Permissions."
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_audit_file_permissions }}"
+        with_items:
+            - "{{ ubtu_20_010133_audit_config_files_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010133_audit_config_files_permissions_audit.stdout | length > 0
+  when:
+      - ubtu_20_010133
+  tags:
+      - UBTU-20-010133
+      - CAT2
+      - CCI-000171
+      - SRG-OS-000063-GPOS-00032
+      - SV-238249r653922_rule
+      - V-238249
+      - auditd
+
 - name: |
-    "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users."
     "MEDIUM | UBTU-20-010134 | PATCH | The Ubuntu operating system must permit only authorized accounts to own the audit configuration files."
     "MEDIUM | UBTU-20-010135 | PATCH | The Ubuntu operating system must permit only authorized groups to own the audit configuration files."
   block:
       - name: |
-          "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Create List."
           "MEDIUM | UBTU-20-010134 | PATCH | The Ubuntu operating system must permit only authorized accounts to own the audit configuration files. | Create List."
           "MEDIUM | UBTU-20-010135 | PATCH | The Ubuntu operating system must permit only authorized groups to own the audit configuration files. | Create List."
-        shell: sudo find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/ -type f
+        shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f ! -user root -o -type f ! -group root
+        become: true
         changed_when: false
         failed_when: false
-        register: ubtu_20_audit_file_paths
+        register: ubtu_20_010134_audit_config_files_root_permissions_audit
 
       - name: |
-          "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Set User Write Permissions."
           "MEDIUM | UBTU-20-010134 | PATCH | The Ubuntu operating system must permit only authorized accounts to own the audit configuration files. | Set Account Owner."
           "MEDIUM | UBTU-20-010135 | PATCH | The Ubuntu operating system must permit only authorized groups to own the audit configuration files. | Set Group Owner."
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010134 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010135 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010133 | ternary(ubtu20stig_audit_file_permissions,omit) }}"
-        with_items: "{{ ubtu_20_audit_file_paths.stdout_lines }}"
+        with_items:
+            - "{{ ubtu_20_010134_audit_config_files_root_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010134_audit_config_files_root_permissions_audit.stdout | length > 0
   when:
-      - ubtu_20_010133 or
-        ubtu_20_010134 or
+      - ubtu_20_010134 or
         ubtu_20_010135
   tags:
-      - UBTU-20-010133
       - UBTU-20-010134
       - UBTU-20-010135
       - CAT2
       - CCI-000171
       - SRG-OS-000063-GPOS-00032
-      - SV-238249r653922_rule
       - SV-238250r653925_rule
       - SV-238251r653928_rule
-      - V-238249
       - V-238250
       - V-238251
       - auditd
@@ -1600,48 +1692,70 @@
       - V-238299
       - grub
 
+- name: "MEDIUM | UBTU-20-010199 | PATCH | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive."
+  block:
+      - name: "MEDIUM | UBTU-20-010199 | Audit | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Obtain Files Not With 755 Or Less."
+        shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f -perm -755 ! -perm 755
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010199_file_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010199 | Audit | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Adjust Audit Tool If higher then 0755."
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_audit_tool_permissions }}"
+        with_items:
+            - "{{ ubtu_20_010199_file_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010199_file_permissions_audit.stdout | length > 0
+  when:
+      - ubtu_20_010199
+  tags:
+      - UBTU-20-010199
+      - CAT2
+      - CCI-001493
+      - CCI-001494
+      - SRG-OS-000256-GPOS-00097
+      - SV-238300r654075_rule
+      - V-238300
+      - permissions
+
 - name: |
-    "MEDIUM | UBTU-20-010199 | PATCH | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive."
     "MEDIUM | UBTU-20-010200 | PATCH | The Ubuntu operating system must configure audit tools to be owned by root."
     "MEDIUM | UBTU-20-010201 | PATCH | The Ubuntu operating system must configure the audit tools to be group-owned by root."
   block:
       - name: |
-          "MEDIUM | UBTU-20-010199 | PATCH | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Find tools with less than 755 perms"
-          "MEDIUM | UBTU-20-010200 | PATCH | The Ubuntu operating system must configure audit tools to be owned by root. | Set Owner Root."
-          "MEDIUM | UBTU-20-010201 | PATCH | The Ubuntu operating system must configure the audit tools to be group-owned by root. | Set Group Owner Root."
-        shell: stat -c "%a %n" /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules | cut -f2 -d" "
+          "MEDIUM | UBTU-20-010200 | AUDIT | The Ubuntu operating system must configure audit tools to be owned by root. | Find Non-Root Files."
+          "MEDIUM | UBTU-20-010201 | AUDIT | The Ubuntu operating system must configure the audit tools to be group-owned by root. | Find Non-Root Files."
+        shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f ! -user root -o -type f ! -group root
         changed_when: false
         failed_when: false
-        register: ubtu_20_010199_tools
+        register: ubtu_20_010200_root_permissions_audit
 
       - name: |
-          "MEDIUM | UBTU-20-010199 | PATCH | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Set permissions to 755 on tools"
-          "MEDIUM | UBTU-20-010200 | PATCH | The Ubuntu operating system must configure audit tools to be owned by root."
-          "MEDIUM | UBTU-18-010130 | PATCH | The Ubuntu operating system must configure the audit tools to be group-owned by root."
+          "MEDIUM | UBTU-20-010200 | PATCH | The Ubuntu operating system must configure audit tools to be owned by root. | Assign Root To File."
+          "MEDIUM | UBTU-20-010201 | PATCH | The Ubuntu operating system must configure the audit tools to be group-owned by root. | Assign Root To File."
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010200 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010201 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010199 | ternary(ubtu20stig_tool_perms,omit) }}"
         with_items:
-            - "{{ ubtu_20_010199_tools.stdout_lines }}"
-        when: ubtu_20_010199_tools.stdout | length > 0
+            - "{{ ubtu_20_010200_root_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010200_root_permissions_audit.stdout | length > 0
   when:
-      - ubtu_20_010199 or
-        ubtu_20_010200 or
+      - ubtu_20_010200 or
         ubtu_20_010201
   tags:
-      - UBTU-20-010199
       - UBTU-20-010200
       - UBTU-20-010201
       - CAT2
       - CCI-001493
       - CCI-001494
       - SRG-OS-000256-GPOS-00097
-      - SV-238300r654075_rule
       - SV-238301r654078_rule
       - SV-238302r654081_rule
-      - V-238300
       - V-238301
       - V-238302
       - permissions
@@ -1649,19 +1763,20 @@
 - name: "MEDIUM | UBTU-20-010205 | PATCH | The Ubuntu operating system must use cryptographic mechanisms to protect the integrity of audit tools."
   lineinfile:
       path: /etc/aide/aide.conf
-      line: "{{ item }}"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }} "
       owner: root
       group: root
       mode: 0600
   with_items:
-      - "# Audit Tools"
-      - "/sbin/auditctl p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/auditd p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/ausearch p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/aureport p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/autrace p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/audispd p+i+n+u+g+s+b+acl+xattrs+sha512"
-      - "/sbin/augenrules p+i+n+u+g+s+b+acl+xattrs+sha512"
+      - { regexp: '# Audit Tools', line: '# Audit Tools'}
+      - { regexp: '/sbin/auditctl', line: '/sbin/auditctl {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/auditd', line: '/sbin/auditd {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/ausearch', line: '/sbin/ausearch {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/aureport', line: '/sbin/aureport {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/autrace', line: '/sbin/autrace {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/audispd', line: '/sbin/audispd {{ ubtu20stig_cryptographic_mechanisms }}' }
+      - { regexp: '/sbin/augenrules', line: '/sbin/augenrules {{ ubtu20stig_cryptographic_mechanisms }}' }
   when:
       - ubtu_20_010205
   tags:
@@ -1818,7 +1933,6 @@
       - SV-238320r832956_rule
       - V-238320
       - auditd
-
 
 - name: "MEDIUM | UBTU-20-010403 | PATCH |  The Ubuntu operating system must monitor remote access methods."
   block:
@@ -1977,7 +2091,8 @@
             mode: '1777'
         with_items:
             - "{{ ubtu_20_010411_world_writable_directories.stdout_lines }}"
-        when: ubtu_20_010411_world_writable_directories.stdout | length > 0
+        when:
+            - ubtu_20_010411_world_writable_directories.stdout | length > 0
   when:
       - ubtu_20_010411
   tags:
@@ -2004,7 +2119,7 @@
       - name: "MEDIUM | UBTU-20-010412 | PATCH | The Ubuntu operating system must be configured to use TCP syncookies."
         lineinfile:
             path: /etc/sysctl.conf
-            regexp: '^net.ipv4.tcp_syncookies =|^#net.ipv4.tcp_syncookies'
+            regexp: '^#?\s*net.ipv4.tcp_syncookies'
             line: "net.ipv4.tcp_syncookies = 1"
   when:
       - ubtu_20_010412
@@ -2082,19 +2197,21 @@
 
 - name: "MEDIUM | UBTU-20-010416 | PATCH | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries."
   block:
-      - name: "MEDIUM | UBTU-20-010416 | AUDIT | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries. | Find if files exist"
-        shell: find /var/log -perm /137 ! -name '*[bw]tmp' ! -name '*lastlog' -type f -exec stat -c "%n %a" {} \;
-        # shell: find /var/log -perm /137 -type f -exec stat -c "%n %a" {} \;
+      - name: "MEDIUM | UBTU-20-010416 | AUDIT | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries. | Audit Files For Permissions"
+        shell: find /var/log ! -name '*[bw]tmp' ! -name '*lastlog' -type f -perm -640 ! -perm 640 -exec stat -c "%n" {} \;
+        become: true
         changed_when: false
         failed_when: false
-        register: ubtu_20_010416_var_log_permissions
+        register: ubtu_20_010416_var_log_file_permissions
 
       - name: "MEDIUM | UBTU-20-010416 | PATCH | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries. | Fix files"
-        # shell: find /var/log -perm /137 -type f -exec chmod 640 '{}' \;
-        shell: find /var/log -perm /137 ! -name '*[bw]tmp' ! -name '*lastlog' -type f -exec chmod 640 '{}' \;
-        changed_when: false
-        failed_when: false
-        when: ubtu_20_010416_var_log_permissions.stdout | length > 0
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_var_log_file_perms }}"
+        with_items:
+            - "{{ ubtu_20_010416_var_log_file_permissions.stdout_lines }}"
+        when:
+            - ubtu_20_010416_var_log_file_permissions.stdout | length > 0
   when:
       - ubtu_20_010416
   tags:
@@ -2109,193 +2226,299 @@
 - name: |
     "MEDIUM | UBTU-20-010417 | PATCH | The Ubuntu operating system must configure the /var/log directory to be group-owned by syslog."
     "MEDIUM | UBTU-20-010418 | PATCH | The Ubuntu operating system must configure the /var/log directory to be owned by root."
-    "MEDIUM | UBTU-20-010419 | PATCH | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive."
   file:
       path: /var/log
       owner: "{{ ubtu_20_010418 | ternary('root',omit) }}"
       group: "{{ ubtu_20_010417 | ternary('syslog',omit) }}"
-      mode: "{{ ubtu_20_010419 | ternary(ubtu20stig_var_log_perms,omit) }}"
       state: directory
   when:
       - ubtu_20_010417 or
-        ubtu_20_010418 or
-        ubtu_20_010419
+        ubtu_20_010418
   tags:
       - UBTU-20-010417
       - UBTU-20-010418
-      - UBTU-20-010419
       - CAT2
       - CCI-001314
       - SRG-OS-000206-GPOS-00084
       - SV-238338r654189_rule
       - SV-238339r654192_rule
-      - SV-238340r880879_rule
       - V-238338
       - V-238339
+      - permissions
+
+- name: "MEDIUM | UBTU-20-010419 | PATCH | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive."
+  block:
+      - name: "MEDIUM | UBTU-20-010419 | AUDIT | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive. | Find Dir Permissions."
+        shell: stat -c "%a" /var/log
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010419_var_log_dir_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010419 | PATCH | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive. | Change Log Dir Permissions."
+        file:
+            path: /var/log
+            mode: "{{ ubtu20stig_var_log_perms }}"
+            state: directory
+        when:
+            - ubtu_20_010419_var_log_dir_permissions_audit.stdout > '755'
+  when:
+      - ubtu_20_010419
+  tags:
+      - UBTU-20-010419
+      - CAT2
+      - CCI-001314
+      - SRG-OS-000206-GPOS-00084
+      - SV-238340r880879_rule
       - V-238340
       - permissions
 
 - name: |
     "MEDIUM | UBTU-20-010420 | PATCH | The Ubuntu operating system must configure the /var/log/syslog file to be group-owned by adm."
     "MEDIUM | UBTU-20-010421 | PATCH | he Ubuntu operating system must configure /var/log/syslog file to be owned by syslog."
-    "MEDIUM | UBTU-20-010422 | PATCH | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive."
   file:
       path: /var/log/syslog
       owner: "{{ ubtu_20_010421 | ternary('syslog',omit) }}"
       group: "{{ ubtu_20_010420 | ternary('adm',omit) }}"
-      mode: "{{ ubtu_20_010422 | ternary(ubtu20stig_var_log_syslog_perms,omit) }}"
   when:
       - ubtu_20_010420 or
-        ubtu_20_010421 or
-        ubtu_20_010422
+        ubtu_20_010421
   tags:
       - UBTU-20-010420
       - UBTU-20-010421
-      - UBTU-20-010422
       - CAT2
       - CCI-001314
       - SRG-OS-000206-GPOS-00084
       - SV-238341r654198_rule
       - SV-238342r654201_rule
-      - SV-238343r654204_rule
       - V-238341
       - V-238342
+      - permissions
+
+- name: "MEDIUM | UBTU-20-010422 | PATCH | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive."
+  block:
+      - name: "MEDIUM | UBTU-20-010422 | AUDIT | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive. | Find Dir Permissions."
+        shell: stat -c "%a" /var/log/syslog
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010422_var_log_syslog_dir_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010422 | PATCH | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive. | Change SysLog Dir Permissions."
+        file:
+            path: /var/log/syslog
+            mode: "{{ ubtu20stig_var_log_syslog_perms }}"
+        when:
+            - ubtu_20_010422_var_log_syslog_dir_permissions_audit.stdout > '640'
+  when:
+      - ubtu_20_010422
+  tags:
+      - UBTU-20-010422
+      - CAT2
+      - CCI-001314
+      - SRG-OS-000206-GPOS-00084
+      - SV-238343r654204_rule
       - V-238343
       - permissions
 
+- name: "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive."
+  block:
+      - name: "MEDIUM | UBTU-20-010423 | AUDIT | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Get OS command directories with mode more than 755"
+        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -type d -perm -755 ! -perm 755
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010423_command_dir_permissions_audit
+
+      - name: "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Set Dir Permissions."
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_sys_comm_dir_perms }}"
+            state: directory
+        with_items:
+            - "{{ ubtu_20_010423_command_dir_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010423_command_dir_permissions_audit.stdout | length > 0
+  tags:
+      - UBTU-20-010423
+      - CAT2
+      - CCI-001495
+      - SRG-OS-000258-GPOS-00099
+      - SV-238344r654207_rule
+      - V-238344
+      - permissions
+
 - name: |
-    "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive."
     "MEDIUM | UBTU-20-010424 | PATCH | The Ubuntu operating system must have directories that contain system commands owned by root."
     "MEDIUM | UBTU-20-010425 | PATCH | The Ubuntu operating system must have directories that contain system commands group-owned by root."
   block:
       - name: |
-          "MEDIUM | UBTU-20-010423 | AUDIT | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Get OS command directories with mode less than 755"
           "MEDIUM | UBTU-20-010424 | AUDIT | The Ubuntu operating system must have directories that contain system commands owned by root. | Get OS command dirs not owned by root"
-          "MEDIUM | UBTU-20-010425 | PATCH | The Ubuntu operating system must have directories that contain system commands group-owned by root. | Get OS command dirs not group-owned by root"
-        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root -o -perm /022 \) -type d -exec stat -c "%n" '{}' \;
+          "MEDIUM | UBTU-20-010425 | AUDIT | The Ubuntu operating system must have directories that contain system commands group-owned by root. | Get OS command dirs not group-owned by root"
+        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root \) -type d -exec stat -c "%n" '{}' \;
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010423_command_dir_perms
 
       - name: |
-          "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Set OS command directories with mode 755 or more restrictive"
           "MEDIUM | UBTU-20-010424 | PATCH | The Ubuntu operating system must have directories that contain system commands owned by root. | Set OS command dirs not owned by root to root"
           "MEDIUM | UBTU-20-010425 | PATCH | The Ubuntu operating system must have directories that contain system commands group-owned by root. | Set OS command dirs not group-owned by root to root"
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010424 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010425 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010423 | ternary(ubtu20stig_sys_comm_dir_perms,omit) }}"
             state: directory
         with_items:
             - "{{ ubtu_20_010423_command_dir_perms.stdout_lines }}"
-        when: ubtu_20_010423_command_dir_perms.stdout | length > 0
+        when:
+            - ubtu_20_010423_command_dir_perms.stdout | length > 0
   when:
-      - ubtu_20_010423 or
-        ubtu_20_010424 or
+      - ubtu_20_010424 or
         ubtu_20_010425
   tags:
-      - UBTU-20-010423
       - UBTU-20-010424
       - UBTU-20-010425
       - CAT2
       - CCI-001495
       - SRG-OS-000258-GPOS-00099
-      - SV-238344r654207_rule
       - SV-238345r654210_rule
       - SV-238346r654213_rule
-      - V-238344
       - V-238345
       - V-238346
       - permissions
 
-- name: |
-    "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive."
-    "MEDIUM | UBTU-20-010428 | PATCH | The Ubuntu operating system library files must be owned by root."
-    "MEDIUM | UBTU-20-010430 | PATCH | The Ubuntu operating system library files must be group-owned by root."
+- name: "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive."
   block:
-      - name: |
-          "MEDIUM | UBTU-20-010426 | AUDIT | The Ubuntu operating system library files must have mode 0755 or less permissive. | Get library files with mode 0755 or less"
-          "MEDIUM | UBTU-20-010428 | AUDIT | The Ubuntu operating system library files must be owned by root. | Get library files not owned by root"
-          "MEDIUM | UBTU-20-010430 | AUDIT | The Ubuntu operating system library files must be group-owned by root. | Get library files not group-owned by root"
-        shell: find /lib /lib64 /usr/lib \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+      - name: "MEDIUM | UBTU-20-010426 | AUDIT | The Ubuntu operating system library files must have mode 0755 or less permissive. | Get List."
+        shell: find -L /lib/* /lib64/* /usr/lib/* -type f -perm -755 ! -perm 755
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010426_lib_files
 
+      - name: "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive. | Update Permissions."
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_lib_file_perms }}"
+        with_items:
+            - "{{ ubtu_20_010426_lib_files.stdout_lines }}"
+        when:
+            - ubtu_20_010426_lib_files.stdout | length > 0
+  when:
+      - ubtu_20_010426
+  tags:
+      - UBTU-20-010426
+      - CAT2
+      - CCI-001499
+      - SRG-OS-000259-GPOS-00100
+      - SV-238347r654216_rule
+      - V-238347
+      - permissions
+
+- name: "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive."
+  block:
+      - name: "MEDIUM | UBTU-20-010427 | AUDIT | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Get library directories with 755 or less"
+        shell: find -L /lib /lib64 /usr/lib -type d -perm -755 ! -perm 755
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010427_lib_dirs
+
+      - name: "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Set library directories with 755 or more restrictive"
+        file:
+            path: "{{ item }}"
+            mode: "{{ ubtu20stig_lib_dir_perms }}"
+            state: directory
+        with_items:
+            - "{{ ubtu_20_010427_lib_dirs.stdout_lines }}"
+        when:
+            - ubtu_20_010427_lib_dirs.stdout | length > 0
+  when:
+      - ubtu_20_010427
+  tags:
+      - UBTU-20-010427s
+      - CAT2
+      - CCI-001499
+      - SRG-OS-000259-GPOS-00100
+      - SV-238348r654219_rule
+      - V-238348
+      - permissions
+
+- name: |
+    "MEDIUM | UBTU-20-010428 | PATCH | The Ubuntu operating system library files must be owned by root."
+    "MEDIUM | UBTU-20-010430 | PATCH | The Ubuntu operating system library files must be group-owned by root."
+  block:
       - name: |
-          "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive. | Set library files with mode 0755 or more restrictive"
+          "MEDIUM | UBTU-20-010428 | AUDIT | The Ubuntu operating system library files must be owned by root. | Get library files not owned by root"
+          "MEDIUM | UBTU-20-010430 | AUDIT | The Ubuntu operating system library files must be group-owned by root. | Get library files not group-owned by root"
+        shell: find -L /lib /lib64 /usr/lib -type f ! -user root -o -type f ! -group root
+        become: true
+        changed_when: false
+        failed_when: false
+        register: ubtu_20_010428_lib_files_permissions_audit
+
+      - name: |
           "MEDIUM | UBTU-20-010428 | PATCH | The Ubuntu operating system library files must be owned by root. | Set library files to be owned by root"
           "MEDIUM | UBTU-20-010430 | PATCH | The Ubuntu operating system library files must be group-owned by root. | Set library files not group-owned by root"
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010428 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010430 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010426 | ternary(ubtu20stig_lib_file_perms,omit) }}"
         with_items:
-            "{{ ubtu_20_010426_lib_files.stdout_lines }}"
-        when: ubtu_20_010426_lib_files.stdout | length > 0
+            - "{{ ubtu_20_010428_lib_files_permissions_audit.stdout_lines }}"
+        when:
+            - ubtu_20_010428_lib_files_permissions_audit.stdout | length > 0
   when:
-      - ubtu_20_010426 or
-        ubtu_20_010428 or
+      - ubtu_20_010428 or
         ubtu_20_010430
   tags:
-      - UBTU-20-010426
       - UBTU-20-010428
       - UBTU-20-010430
       - CAT2
       - CCI-001499
       - SRG-OS-000259-GPOS-00100
-      - SV-238347r654216_rule
       - SV-238349r654222_rule
       - SV-238351r832962_rule
-      - V-238347
       - V-238349
       - V-238351
       - permissions
 
 - name: |
-    "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive."
     "MEDIUM | UBTU-20-010429 | PATCH | The Ubuntu operating system library directories must be owned by root."
     "MEDIUM | UBTU-20-010431 | PATCH | The Ubuntu operating system library directories must be group-owned by root."
   block:
       - name: |
-          "MEDIUM | UBTU-20-010427 | AUDIT | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Get library directories with 750 or less"
           "MEDIUM | UBTU-20-010429 | AUDIT | The Ubuntu operating system library directories must be owned by root. | Get OS library directories not owned by root"
           "MEDIUM | UBTU-20-010431 | AUDIT | The Ubuntu operating system library directories must be group-owned by root. | Get OS library directories not group-owned by root"
-        shell: find /lib /lib64 /usr/lib \( ! -group root -o ! -user root -o -perm /022 \) -type d -exec stat -c "%n" '{}' \;
+        shell: find -L /lib /lib64 /usr/lib -type d ! -user root -o -type d ! -group root
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010427_lib_dirs
 
       - name: |
-          "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Set library directories with 755 or more restrictive"
           "MEDIUM | UBTU-20-010429 | PATCH | The Ubuntu operating system library directories must be owned by root. | Set OS library directories not owned by root"
           "MEDIUM | UBTU-20-010431 | PATCH | The Ubuntu operating system library directories must be group-owned by root. | Set OS library directories not group-owned by root"
         file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010429 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010431 | ternary('root',omit) }}"
-            mode: "{{ ubtu_20_010427 | ternary(ubtu20stig_lib_dir_perms,omit) }}"
             state: directory
         with_items:
             - "{{ ubtu_20_010427_lib_dirs.stdout_lines }}"
-        when: ubtu_20_010427_lib_dirs.stdout | length > 0
+        when:
+            - ubtu_20_010427_lib_dirs.stdout | length > 0
   when:
-      - ubtu_20_010427 or
-        ubtu_20_010429 or
+      - ubtu_20_010429 or
         ubtu_20_010431
   tags:
-      - UBTU-20-010427
       - UBTU-20-010429
       - UBTU-20-010431
       - CAT2
       - CCI-001499
       - SRG-OS-000259-GPOS-00100
-      - SV-238348r654219_rule
       - SV-238350r654225_rule
       - SV-238352r654231_rule
-      - V-238348
       - V-238350
       - V-238352
       - permissions
@@ -2377,7 +2600,7 @@
 - name: "MEDIUM | UBTU-20-010437 | PATCH | The Ubuntu operating system must notify designated personnel if baseline configurations are changed in an unauthorized manner. The file integrity tool must notify the system administrator when changes to the baseline configuration or anomalies in the operation of any security functions are discovered."
   lineinfile:
       path: /etc/default/aide
-      regexp: '^SILENTREPORTS= |^#SILENTREPORTS='
+      regexp: '^#?\s*SILENTREPORTS='
       line: "SILENTREPORTS=no"
   when:
       - ubtu_20_010437 or
@@ -2639,7 +2862,7 @@
 - name: "MEDIUM | UBTU-20-010448 | PATCH | The Ubuntu operating system must implement address space layout randomization to protect its memory from unauthorized code execution."
   lineinfile:
       path: /etc/sysctl.conf
-      regexp: '^kernel.randomize_va_space'
+      regexp: '^#?\s*kernel.randomize_va_space'
       line: "kernel.randomize_va_space=2"
   notify: reload kernel system
   when:
@@ -2712,7 +2935,8 @@
         register: ubtu_20_010450_aidedbnew_present
 
       - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Initialize If Not Already Running."
-        shell: sudo aideinit
+        shell: aideinit
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010450_aide_initialized
@@ -2721,7 +2945,8 @@
             - not ubtu_20_010450_aidedbnew_present.stat.exists
 
       - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Copy New Database."
-        shell: sudo cp -p /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+        shell: cp -p /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+        become: true
         changed_when: false
         failed_when: false
         when:
@@ -2854,7 +3079,7 @@
 - name: "MEDIUM | UBTU-20-010045 | PATCH | The Ubuntu operating system SSH server must be configured to use only FIPS-validated key exchange algorithms."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '(?i)^#?KexAlgorithms'
+      regexp: '^#?\s*KexAlgorithms'
       line: 'KexAlgorithms {{ ubtu20stig_sshd.kexalgorithms }}'
   notify: restart sshd
   when:
