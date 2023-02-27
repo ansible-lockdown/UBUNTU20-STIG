@@ -3,7 +3,8 @@
 - name: "PRELIM | Include Parse /etc/passwd"
   import_tasks: parse_etc_passwd.yml
   when:
-      - ubtu_20_010410
+      - ubtu_20_010410 or
+        ubtu_20_010000
 
 - name: "PRELIM | Run apt update"
   apt:
@@ -34,9 +35,10 @@
             name: dconf-cli
             state: present
         when:
-            - ubtu20stig_dconf_status.stdout == ""
+            - ubtu20stig_dconf_status.stdout | length == 0
             - "'dconf-cli' not in ansible_facts.packages"
   when:
+      - ubtu20stig_desktop_required
       - ubtu_20_010459
   tags:
       - cat1
@@ -121,8 +123,8 @@
   when:
       - "'rsyslog' not in ansible_facts.packages"
       - ubtu20stig_cat2_patch or
-      - ubtu_20_010403 or
-      - ubtu_20_010432
+        ubtu_20_010403 or
+        ubtu_20_010432
 
 - name: "PRELIM | Install sssd package"
   package:

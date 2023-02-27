@@ -1,4 +1,5 @@
 ---
+
 galaxy_info:
     author: "Stephen Williams, George Nalen, Mark Bolwell"
     description: "Apply the DISA Ubuntu 20 STIG"

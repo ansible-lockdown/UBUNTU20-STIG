@@ -42,13 +42,15 @@
 - name: "HIGH | UBTU-20-010009 | AUDIT | The Ubuntu operating system must map the authenticated identity to the user or group account for PKI-based authentication."
   block:
       - name: "HIGH | UBTU-20-010009 | AUDIT | The Ubuntu operating system must map the authenticated identity to the user or group account for PKI-based authentication. | Superuser Check In Grub."
-        shell: sudo grep "^set superusers" /boot/grub/grub.cfg
+        shell: grep "^set superusers" /boot/grub/grub.cfg
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010009_bootloader_grub_check
 
       - name: "HIGH | UBTU-20-010009 | AUDIT | The Ubuntu operating system must map the authenticated identity to the user or group account for PKI-based authentication. | Hash Password Check In Grub."
-        shell: sudo grep "^password" /boot/grub/grub.cfg
+        shell: grep "^password" /boot/grub/grub.cfg
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010009_bootloader_hash_check
@@ -93,14 +95,14 @@
 - name: "HIGH | UBTU-20-010012 | PATCH | The Ubuntu operating system must ensure only users who need access to security functions are part of sudo group."
   block:
       - name: "HIGH | UBTU-20-010012 | AUDIT | The Ubuntu operating system must ensure only users who need access to security functions are part of sudo group. | Verify Users In Sudo Group."
-        shell: 'grep sudo /etc/group | cut -f4 -d:'
+        shell: 'grep {{ ubtu20stig_sudo_group_name }} /etc/group | cut -f4 -d:'
         changed_when: false
         failed_when: false
-        register: ubtu_20_010009_sudoers_group
+        register: ubtu_20_010012_sudoers_group
 
       - name: "HIGH | UBTU-20-010012 | AUDIT | The Ubuntu operating system must ensure only users who need access to security functions are part of sudo group. | Set Fact Sudoers List."
         set_fact:
-            sudoers_group_list: "{{ ubtu_20_010009_sudoers_group.stdout.split(',') }}"
+            sudoers_group_list: "{{ ubtu_20_010012_sudoers_group.stdout.split(',') }}"
 
       - name: "HIGH | UBTU-20-010012 | AUDIT | The Ubuntu operating system must ensure only users who need access to security functions are part of sudo group. | Compare List Of Unauthorized Users."
         set_fact:
@@ -171,8 +173,8 @@
       line: "{{ item.line }}"
   notify: restart sshd
   with_items:
-      - { regexp: '^PermitEmptyPasswords ', line: 'PermitEmptyPasswords no' }
-      - { regexp: '^PermitUserEnvironment ', line: 'PermitUserEnvironment no'}
+      - { regexp: '^#?\s*PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
+      - { regexp: '^#?\s*PermitUserEnvironment', line: 'PermitUserEnvironment no'}
   when:
       - ubtu_20_010047
   tags:
@@ -187,7 +189,7 @@
 - name: "HIGH | UBTU-20-010048 | PATCH | The Ubuntu operating system must be configured so that remote X connections are disabled, unless to fulfill documented and validated mission requirements."
   lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^X11Forwarding '
+      regexp: '^#?\s*X11Forwarding'
       line: "X11Forwarding no"
   notify: restart sshd
   when:
@@ -223,7 +225,7 @@
       state: absent
   when:
       - ubtu_20_010406
-      - not ubtu20stig_rsh_required
+      - not ubtu20stig_rshserver_required
   tags:
       - UBTU-20-010406
       - CAT1
@@ -235,26 +237,19 @@
 
 - name: "HIGH | UBTU-20-010442 | AUDIT | The Ubuntu operating system must implement NIST FIPS-validated cryptography to protect classified information and for the following: To provision digital signatures, to generate cryptographic hashes, and to protect unclassified information requiring confidentiality and cryptographic protection in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards."
   block:
-      - name: "HIGH | UBTU-20-010442 | AUDIT | The Ubuntu operating system must implement NIST FIPS-validated cryptography to protect classified information and for the following: To provision digital signatures, to generate cryptographic hashes, and to protect unclassified information requiring confidentiality and cryptographic protection in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Check for fips-mode"
-        command: grep -i 1 /proc/sys/crypto/fips_enabled
-        changed_when: false
-        failed_when: false
-        register: ubtustig_20_010442_fips_status
-
       - name: "HIGH | UBTU-20-010442 | AUDIT | The Ubuntu operating system must implement NIST FIPS-validated cryptography to protect classified information and for the following: To provision digital signatures, to generate cryptographic hashes, and to protect unclassified information requiring confidentiality and cryptographic protection in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Alert no fips-mode"
         debug:
             msg:
                 - "Warning!! You do not have FIPS-Mode enabled. This is a finding, please enable to conform to STIG standards"
                 - "A subscription to the Ubuntu Pro plan is required to obtain the FIPS Kernel cryptographic modules and enable FIPS"
-        when: "'1' not in ubtustig_20_010442_fips_status.stdout"
 
       - name: "HIGH | UBTU-20-010442 | AUDIT | The Ubuntu operating system must implement NIST FIPS-validated cryptography to protect classified information and for the following: To provision digital signatures, to generate cryptographic hashes, and to protect unclassified information requiring confidentiality and cryptographic protection in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Set warning count"
         import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010442'
-        when: "'1' not in ubtustig_20_010442_fips_status.stdout"
   when:
       - ubtu_20_010442
+      - not ansible_fips
   tags:
       - UBTU-20-010442
       - CAT1
@@ -354,7 +349,7 @@
 - name: "HIGH | UBTU-20-010463 | PATCH | The Ubuntu operating system must not allow accounts configured with blank or null passwords."
   replace:
       path: /etc/pam.d/common-password
-      regexp: ' nullok'
+      regexp: 'nullok'
       replace: ''
   when:
       - ubtu_20_010463

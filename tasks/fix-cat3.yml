@@ -3,7 +3,7 @@
 - name: "LOW | UBTU-20-010007 | PATCH | The Ubuntu operating system must enforce 24 hours/1 day as the minimum password lifetime. Passwords for new users must have a 24 hours/1 day minimum password lifetime restriction."
   lineinfile:
       path: /etc/login.defs
-      regexp: '^PASS_MIN_DAYS|^#.*PASS_MIN_DAYS'
+      regexp: '^#?\s*PASS_MIN_DAYS'
       line: "PASS_MIN_DAYS   {{ ubtu20stig_pass_min_days }}"
   when:
       - ubtu_20_010007
@@ -19,7 +19,7 @@
 - name: "LOW | UBTU-20-010008 | PATCH | The Ubuntu operating system must enforce a 60-day maximum password lifetime restriction. Passwords for new users must have a 60-day maximum password lifetime restriction."
   lineinfile:
       path: /etc/login.defs
-      regexp: '^PASS_MAX_DAYS|^#.*PASS_MAX_DAYS'
+      regexp: '^#?\s*PASS_MAX_DAYS'
       line: "PASS_MAX_DAYS   {{ ubtu20stig_pass_max_days }}"
   when:
       - ubtu_20_010008
@@ -35,7 +35,7 @@
 - name: "LOW | UBTU-20-010050 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one upper-case character be used."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^ucredit.*=|^#.*ucredit.*='
+      regexp: '^#?\s*ucredit.*='
       line: ucredit = {{ ubtu20stig_pwquality_ucredit }}
   when:
       - ubtu_20_010050
@@ -51,7 +51,7 @@
 - name: "LOW | UBTU-20-010051 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one lower-case character be used."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^lcredit.*=|^#.*lcredit.*='
+      regexp: '^#?\s*lcredit.*='
       line: lcredit = {{ ubtu20stig_pwquality_lcredit }}
   when:
       - ubtu_20_010051
@@ -67,7 +67,7 @@
 - name: "LOW | UBTU-20-010052 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one numeric character be used."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^dcredit.*=|^#.*dcredit.*='
+      regexp: '^#?\s*dcredit.*='
       line: dcredit = {{ ubtu20stig_pwquality_dcredit }}
   when:
       - ubtu_20_010052
@@ -83,7 +83,7 @@
 - name: "LOW | UBTU-20-010053 | PATCH | The Ubuntu operating system must require the change of at least 8 characters when passwords are changed."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^difok.*=|^#.*difok.*='
+      regexp: '^#?\s*difok.*='
       line: difok = {{ ubtu20stig_pwquality_difok }}
   when:
       - ubtu_20_010053
@@ -99,7 +99,7 @@
 - name: "LOW | UBTU-20-010055 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one special character be used."
   lineinfile:
       path: /etc/security/pwquality.conf
-      regexp: '^ocredit.*=|^#.*ocredit.*='
+      regexp: '^#?\s*ocredit.*='
       line: ocredit = {{ ubtu20stig_pwquality_ocredit }}
   when:
       - ubtu_20_010055
@@ -226,11 +226,11 @@
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
         with_items:
-            - { regexp: '^audit.*|^#.*audit.*', line: 'audit' }
-            - { regexp: '^silent.*|^#.*silent.*', line: 'silent' }
-            - { regexp: '^deny.*=|^#.*deny.*=', line: 'deny = {{ ubtu20stig_pamd_failock.deny }}' }
-            - { regexp: '^fail_interval.*=|^#.*fail_interval.*=', line: 'fail_interval = {{ ubtu20stig_pamd_failock.fail_interval }}' }
-            - { regexp: '^unlock_time.*=|^#.*unlock_time.*=', line: 'unlock_time = {{ ubtu20stig_pamd_failock.unlock_time }}' }
+            - { regexp: '^#?\s*audit', line: 'audit' }
+            - { regexp: '^#?\s*silent', line: 'silent' }
+            - { regexp: '^#?\s*deny', line: 'deny = {{ ubtu20stig_pamd_failock.deny }}' }
+            - { regexp: '^#?\s*fail_interval', line: 'fail_interval = {{ ubtu20stig_pamd_failock.fail_interval }}' }
+            - { regexp: '^#?\s*unlock_time', line: 'unlock_time = {{ ubtu20stig_pamd_failock.unlock_time }}' }
   when:
       - ubtu_20_010072
   tags:
@@ -362,7 +362,8 @@
             - { regexp: '(?i)^#?admin_space_left =', line: 'admin_space_left = {{ ubtu20stig_auditd_admin_space_left }}' }
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Get Email Address Configured."
-        shell: sudo grep ^action_mail_acct /etc/audit/auditd.conf
+        shell: grep ^action_mail_acct /etc/audit/auditd.conf
+        become: true
         failed_when: false
         changed_when: false
         register: ubtu20stig_20_010217_action_mail_acct
@@ -432,7 +433,8 @@
 - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems."
   block:
       - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems. | Get Weekly Crontab Folder."
-        shell: sudo ls /etc/cron.weekly
+        shell: ls /etc/cron.weekly
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010300_cron_weekly
@@ -485,7 +487,8 @@
 - name: "LOW | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours."
   block:
       - name: "MEDIUM | UBTU-20-010410 | PATCH | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Set Accounts To 72 Hour Terminate."
-        shell: sudo chage -E $(date -d "+3 days" +%F) {{ item }}
+        shell: chage -E $(date -d "+3 days" +%F) {{ item }}
+        become: true
         changed_when: false
         failed_when: false
         with_items: "{{ ubtu20_emergency_account }}"
@@ -587,7 +590,7 @@
 - name: "LOW | UBTU-20-010436 | PATCH |  The Ubuntu operating system must synchronize internal information system clocks to the authoritative time source when the time difference is greater than one second."
   lineinfile:
       path: /etc/chrony/chrony.conf
-      regexp: '^makestep|^#makestep'
+      regexp: '^#?\s*makestep'
       line: makestep {{ ubtu20stig_chrony.makestep }}
   notify: restart chrony
   when:
@@ -604,7 +607,7 @@
 - name: "LOW | UBTU-20-010441 | PATCH | The Ubuntu operating system must be configured such that Pluggable Authentication Module (PAM) prohibits the use of cached authentications after one day."
   lineinfile:
       path: /etc/sssd/sssd.conf
-      regexp: '^offline_credentials_expiration =|^#offline_credentials_expiration ='
+      regexp: '^#?\s*offline_credentials_expiration ='
       line: "offline_credentials_expiration = 1"
       create: true
   when:
@@ -663,7 +666,8 @@
 - name: "LOW | UBTU-20-010401 | AUDIT | The Ubuntu operating system must restrict access to the kernel message buffer."
   block:
       - name: "LOW | UBTU-20-010401 | AUDIT | The Ubuntu operating system must restrict access to the kernel message buffer. | Find current status."
-        shell: sudo sysctl kernel.dmesg_restrict
+        shell: sysctl kernel.dmesg_restrict
+        become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010401_conflicting_settings

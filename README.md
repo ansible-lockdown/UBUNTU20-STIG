@@ -1,7 +1,6 @@
-# Ubuntu 20.04 DISA STIG
+## Ubuntu 20.04 DISA STIG
 
-
-Configure an Ubuntu 18 system to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `ubtu18stig_disruption_high` to `yes`.
+Configure an Ubuntu 20 system to be DISA STIG compliant. All findings will be audited by default. Non-disruptive CAT I, CAT II, and CAT III findings will be corrected by default. Disruptive finding remediation can be enabled by setting `ubtu20stig_disruption_high` to `yes`.
 
 This role is based on Ubuntu 20.04 DISA STIG: [Version 1, Rel 7 released on  Jan 26, 2023](https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_CAN_Ubuntu_20-04_LTS_V1R7_STIG.zip).
 
@@ -25,7 +24,7 @@ There is no audit role for this benchmark at this time. Please keep checking bac
 - Ubuntu 20 - Other versions are not supported.
 - Other OSs can be checked by changing the skip_os_check to true for testing purposes.
 
-### General
+## General
 
 - Basic knowledge of Ansible, below are some links to the Ansible documentation to help get started if you are unfamiliar with Ansible
 
@@ -60,7 +59,7 @@ Package 'python-xmltodict' is required if you enable the OpenSCAP tool installat
 
 This role is designed that the end user should not have to edit the tasks themselves. All customizing should be done via the defaults/main.yml file or with extra vars within the project, job, workflow, etc. These variables can be found [here](https://github.com/ansible-lockdown/UBUNTU18-STIG/wiki/Main-Variables) in the Main Variables Wiki page. All variables are listed there along with descriptions.
 
-### Tags
+## Tags
 
 There are many tags available for added control precision. Each control has it's own set of tags noting the control number as well as what parts of the system that control addresses.
 
