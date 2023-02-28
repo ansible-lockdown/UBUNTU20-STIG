@@ -3,6 +3,8 @@
 *.retry
 .cache
 .vagrant
+.vagrantfile
+.Vagrantfile
 tests/*redhat-subscription
 tests/Dockerfile
 *.iso
