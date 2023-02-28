@@ -14,7 +14,7 @@ ubtu20stig_complexity_high: false
 # Show "changed" for complex items not remediated per complexity-high setting
 # to make them stand out.  "changed" items on a second run of the role would
 # indicate items requiring manual review.
-ubtu20stig_audit_complex: true
+ubtu20stig_audit_complex: false
 
 # We've defined disruption-high to indicate items that are likely to cause
 # disruption in a normal workflow.  These items can be remediated automatically

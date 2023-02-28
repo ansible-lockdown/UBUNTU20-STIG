@@ -23,23 +23,14 @@
       - medium
 
 - name: "PRELIM | UBTU-20-010459 | dconf setup"
-  block:
-      - name: "PRELIM | dconf setup | UBTU-20-010459 | check for dconf"
-        command: which dconf
-        changed_when: false
-        failed_when: false
-        register: ubtu20stig_dconf_status
-
-      - name: "PRELIM | dconf setup | UBTU-20-010459 | install if missing"
-        package:
-            name: dconf-cli
-            state: present
-        when:
-            - ubtu20stig_us.stdout | length == 0
-            - "'dconf-cli' not in ansible_facts.packages"
+  package:
+      name: dconf-cli
+      state: present
   when:
       - ubtu20stig_desktop_required
-      - ubtu_20_010459
+      - ubtu_20_010459 or
+        ubtu_20_010002 or
+        ubtu_20_010003
   tags:
       - cat1
       - high

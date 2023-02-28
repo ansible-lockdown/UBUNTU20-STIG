@@ -272,6 +272,7 @@
       - { regexp: 'logout=', line: "logout=''" }
   when:
       - ubtu_20_010459
+      - ubtu20stig_desktop_required
   tags:
       - UBTU-20-010459
       - CAT1
