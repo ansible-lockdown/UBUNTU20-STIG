@@ -4,7 +4,7 @@ ubtu20stig_report_dir: /tmp
 
 ubtu20stig_cat1_patch: true
 ubtu20stig_cat2_patch: true
-ubtu20stig_cat3_patch: false
+ubtu20stig_cat3_patch: true
 
 # We've defined complexity-high to mean that we cannot automatically remediate
 # the rule in question.  In the future this might mean that the remediation

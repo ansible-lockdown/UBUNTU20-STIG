@@ -35,7 +35,7 @@
             name: dconf-cli
             state: present
         when:
-            - ubtu20stig_dconf_status.stdout | length == 0
+            - ubtu20stig_us.stdout | length == 0
             - "'dconf-cli' not in ansible_facts.packages"
   when:
       - ubtu20stig_desktop_required
