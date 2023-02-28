@@ -567,7 +567,7 @@
       - pkcs11
 
 # this is out of order due to it installing needed packages for the next couple of tasks
-- name: "MEDIUM | UBTU-20-010064 | PATCH |  The Ubuntu operating system must accept Personal Identity Verification (PIV) credentials."
+- name: "MEDIUM | UBTU-20-010064 | PATCH | The Ubuntu operating system must accept Personal Identity Verification (PIV) credentials."
   package:
       name: opensc-pkcs11
       state: present
@@ -597,7 +597,6 @@
 
       - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Add Ca to line If not present."
         replace:
-
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '^(.*)none(.*)$'
             replace: '\1ca\2'
