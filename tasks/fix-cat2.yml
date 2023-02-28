@@ -727,7 +727,7 @@
                   - ubtu20stig_custom_sha1_for_aide != ubtu20stig_daily_sha1
                   - ubtu20stig_aide_sha1_current_daily.stdout | length > 0
 
-            - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. Warn Count."
+            - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
               import_tasks: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
