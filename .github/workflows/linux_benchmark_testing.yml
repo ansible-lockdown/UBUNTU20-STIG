@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: windows_testing_pipeline
+name: linux_benchmark_pipeline
 
 # Controls when the action will run.
 # Triggers the workflow on push or pull request
@@ -30,22 +30,15 @@ jobs:
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   pr-message: |-
-                    Congrats on opening your first pull request and thank you for taking the time to help improve Ansible-Lockdown!
-                    Please join in the conversation happening on the [Discord Server](https://discord.io/ansible-lockdown) as well.
-
-    # This workflow contains a single job called "build"
+                      Congrats on opening your first pull request and thank you for taking the time to help improve Ansible-Lockdown!
+                      Please join in the conversation happening on the [Discord Server](https://discord.io/ansible-lockdown) as well.
+      # This workflow contains a single job called "build"
     build:
       # The type of runner that the job will run on
         runs-on: ubuntu-latest
 
         env:
             ENABLE_DEBUG: false
-            ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
-            ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
-            ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-            ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
-            WIN_USERNAME: ${{ secrets.WIN_USERNAME }}
-            WIN_PASSWORD: ${{ secrets.WIN_PASSWORD }}
 
         # Steps represent a sequence of tasks that will be executed as part of the job
         steps:
@@ -55,12 +48,17 @@ jobs:
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
 
-      # Sensitive data stored and passed to terraform
-            - name: user details
+            - name: Add_ssh_key
               working-directory: .github/workflows
-              run: echo "{\"username\":\"${WIN_USERNAME}\",\"password\":\"${WIN_PASSWORD}\"}" >> sensitive_info.json
-
-      # Build out the server
+              env:
+                  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+                  PRIVATE_KEY: "${{ secrets.SSH_PRV_KEY }}"
+              run: |
+                mkdir .ssh
+                chmod 700 .ssh
+                echo $PRIVATE_KEY > .ssh/github_actions.pem
+                chmod 600 .ssh/github_actions.pem
+### Build out the server
             - name: Terraform_Init
               working-directory: .github/workflows
               run: terraform init
@@ -71,13 +69,22 @@ jobs:
 
             - name: Terraform_Apply
               working-directory: .github/workflows
-              run: terraform apply -var-file "OS.tfvars" --auto-approve
+              env:
+                  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              run: terraform apply -var-file "github_vars.tfvars" -var-file "OS.tfvars" --auto-approve -input=false
 
-      # Debug Section
+      ## Debug Section
             - name: DEBUG - Show Ansible hostfile
               if: env.ENABLE_DEBUG == 'true'
               working-directory: .github/workflows
               run: cat hosts.yml
+
+      # Aws deployments taking a while to come up insert sleep or playbook fails
+
+            - name: Sleep for 60 seconds
+              run: sleep 60s
+              shell: bash
 
       # Run the ansible playbook
             - name: Run_Ansible_Playbook
@@ -86,12 +93,13 @@ jobs:
                   playbook: site.yml
                   inventory: .github/workflows/hosts.yml
                   galaxy_file: collections/requirements.yml
-      #          verbose: 3
+                  private_key: ${{ secrets.SSH_PRV_KEY }}
+        #          verbose: 3
               env:
                   ANSIBLE_HOST_KEY_CHECKING: "false"
                   ANSIBLE_DEPRECATION_WARNINGS: "false"
 
-      # Remove test system
+      # Remove test system - User secrets to keep if necessary
 
             - name: Terraform_Destroy
               working-directory: .github/workflows
