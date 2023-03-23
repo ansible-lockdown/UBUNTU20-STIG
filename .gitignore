@@ -44,5 +44,5 @@ benchparse/
 *.retry
 
 # GitHub Action/Workflow files
-.github/
+# .github/
 .DS_Store
