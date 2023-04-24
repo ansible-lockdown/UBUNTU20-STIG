@@ -1,17 +1,17 @@
 ---
 
 - name: "PRELIM | Include Parse /etc/passwd"
-  import_tasks: parse_etc_passwd.yml
+  ansible.builtin.import_tasks: parse_etc_passwd.yml
   when:
       - ubtu_20_010410 or
         ubtu_20_010000
 
 - name: "PRELIM | Run apt update"
-  apt:
+  ansible.builtin.apt:
       update_cache: true
 
 - name: "PRELIM | UBTU-20-010002 | gdm3 setup"
-  package:
+  ansible.builtin.package:
       name: gdm3
       state: present
   when:
@@ -23,7 +23,7 @@
       - medium
 
 - name: "PRELIM | UBTU-20-010459 | dconf setup"
-  package:
+  ansible.builtin.package:
       name: dconf-cli
       state: present
   when:
@@ -36,7 +36,7 @@
       - high
 
 - name: "PRELIM | Install AIDE"
-  package:
+  ansible.builtin.package:
       name: ['aide', 'aide-common']
       state: present
   when:
@@ -47,7 +47,7 @@
         ubtu_20_010074
 
 - name: "PRELIM | Install auditd"
-  package:
+  ansible.builtin.package:
       name: auditd
       state: present
   when:
@@ -67,7 +67,7 @@
         ubtu_20_010215
 
 - name: "PRELIM | Install audisp-remote plugin"
-  package:
+  ansible.builtin.package:
       name: audispd-plugins
       state: present
   when:
@@ -76,26 +76,26 @@
 - name: "PRELIM | Install pam_pkcs11 and check for conf file and location."
   block:
       - name: "PRELIM | Install pam_pkcs11"
-        package:
+        ansible.builtin.package:
             name: libpam-pkcs11
             state: present
         when:
             - "'libpam-pkcs11' not in ansible_facts.packages"
 
       - name: "Check for pam_pkcs11.conf"
-        stat:
+        ansible.builtin.stat:
             path: /etc/pam_pkcs11/pam_pkcs11.conf
         register: pam_pkcs11_conf_stat
 
       - name: "Template pam_pkcs11.conf if does not exist"
-        template:
+        ansible.builtin.template:
             src: pam_pkcs11.conf.j2
             dest: /etc/pam_pkcs11/pam_pkcs11.conf
         when:
             - not pam_pkcs11_conf_stat.stat.exists
 
       - name: "Get location for pam_pkcs11.conf"
-        shell: sudo find / -type f -name "pam_pkcs11.conf"
+        ansible.builtin.shell: sudo find / -type f -name "pam_pkcs11.conf"
         changed_when: false
         failed_when: false
         register: pam_pkcs11_location
@@ -108,7 +108,7 @@
         ubtu_20_010066
 
 - name: "PRELIM | Install rsyslog"
-  package:
+  ansible.builtin.package:
       name: rsyslog
       state: present
   when:
@@ -118,7 +118,7 @@
         ubtu_20_010432
 
 - name: "PRELIM | Install sssd package"
-  package:
+  ansible.builtin.package:
       name: sssd
       state: present
   when:
@@ -127,7 +127,7 @@
       - ubtu_20_010441
 
 - name: "PRELIM | Install Chrony"
-  package:
+  ansible.builtin.package:
       name: chrony
       state: present
   when:
@@ -138,7 +138,7 @@
         ubtu_20_010436
 
 - name: "PRELIM | Install Ufw"
-  package:
+  ansible.builtin.package:
       name: ufw
       state: present
   when:
@@ -147,7 +147,7 @@
         ubtu_20_010454
 
 - name: "PRELIM | Get audit log path"
-  shell: "grep -iw log_file /etc/audit/auditd.conf | cut -d' ' -f3 | sed 's:[^/]*$::'"
+  ansible.builtin.shell: "grep -iw log_file /etc/audit/auditd.conf | cut -d' ' -f3 | sed 's:[^/]*$::'"
   changed_when: false
   failed_when: false
   register: ubtu_20_audit_log_path

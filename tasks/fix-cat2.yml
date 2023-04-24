@@ -3,7 +3,7 @@
 - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less."
   block:
       - name: "MEDIUM | UBTU-20-010000 | PATCH | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Set Accounts To 72 Hour Terminate."
-        shell: chage -E $(date -d "+3 days" +%F) {{ item }}
+        ansible.builtin.shell: chage -E $(date -d "+3 days" +%F) {{ item }}
         become: true
         changed_when: false
         failed_when: false
@@ -12,7 +12,7 @@
         when: ubtu20_temp_account != "none"
 
       - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Warning For Bad Account."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! The account you are trying to set a expiration on is not a valid account on this system."
                 - "Please verify the account using the list below."
@@ -21,7 +21,7 @@
             - ubtu20_temp_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Message out warning"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the system accounts. If any where temporary accounts please make"
                 - "sure they are removed or disabled after the crisis is resolved or within 72 hours"
@@ -35,7 +35,7 @@
             - ubtu20_temp_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010000'
         when:
@@ -56,7 +56,7 @@
 - name: |
     "MEDIUM | UBTU-20-010002 | PATCH | The Ubuntu operating system must enable the graphical user logon banner to display the Standard Mandatory DoD Notice and Consent Banner before granting local access to the system via a graphical user logon. | Set banner settings"
     "MEDIUM | UBTU-20-010003 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting local access to the system via a graphical user logon."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/gdm3/greeter.dconf-defaults
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
@@ -94,13 +94,13 @@
 - name: "MEDIUM | UBTU-20-010004 | PATCH |  The Ubuntu operating system must retain a user's session lock until that user reestablishes access using established identification and authentication procedures."
   block:
       - name: "MEDIUM | UBTU-20-010004 | PATCH |  The Ubuntu operating system must retain a user's session lock until that user reestablishes access using established identification and authentication procedures. | Get screensaver lock status"
-        shell: gsettings get org.gnome.desktop.screensaver lock-enabled
+        ansible.builtin.shell: gsettings get org.gnome.desktop.screensaver lock-enabled
         changed_when: false
         failed_when: false
         register: ubtu_20_010004_screen_saver_lock
 
       - name: "MEDIUM | UBTU-20-010004 | PATCH |  The Ubuntu operating system must retain a user's session lock until that user reestablishes access using established identification and authentication procedures. | Set screensaver lock"
-        shell: gsettings set org.gnome.desktop.screensaver lock-enabled true
+        ansible.builtin.shell: gsettings set org.gnome.desktop.screensaver lock-enabled true
         changed_when: true
         when: "'true' not in ubtu_20_010004_screen_saver_lock.stdout"
   when:
@@ -117,7 +117,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010005 | PATCH | The Ubuntu operating system must allow users to directly initiate a session lock for all connection types."
-  package:
+  ansible.builtin.package:
       name: vlock
       state: present
   when:
@@ -136,13 +136,13 @@
 - name: "MEDIUM | UBTU-20-010010 | AUDIT | The Ubuntu operating system must uniquely identify interactive users."
   block:
       - name: "MEDIUM | UBTU-20-010010 | AUDIT | The Ubuntu operating system must uniquely identify interactive users. | Get duplicate UID users"
-        shell: "awk -F \":\" 'list[$3]++{print $1, $3}' /etc/passwd"
+        ansible.builtin.shell: "awk -F \":\" 'list[$3]++{print $1, $3}' /etc/passwd"
         changed_when: false
         failed_when: false
         register: ubtu_20_010010_duplicate_uid_users
 
       - name: "MEDIUM | UBTU-20-010010 | AUDIT | The Ubuntu operating system must uniquely identify interactive users. | Message about duplicate UID users"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! You have users with duplicate UID's"
                 - "Please resolve to make all users have unique UID's"
@@ -167,7 +167,7 @@
       - users
 
 - name: "MEDIUM | UBTU-20-010013 | PATCH | The Ubuntu operating system must automatically terminate a user session after inactivity timeouts have expired."
-  blockinfile:
+  ansible.builtin.blockinfile:
       path: /etc/profile.d/99-terminal_tmout.sh
       create: true
       mode: 0644
@@ -192,21 +192,21 @@
 - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles."
   block:
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Get sudoers nopasswd files"
-        shell: grep -Ei '(nopasswd)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        ansible.builtin.shell: grep -Ei '(nopasswd)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010014_sudoers_nopasswd_status
 
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Get sudoers authenticate files"
-        shell: grep -Ei '(!authenticate)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
+        ansible.builtin.shell: grep -Ei '(!authenticate)' /etc/sudoers /etc/sudoers.d/* | cut -d':' -f1
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010014_sudoers_authenticate_status
 
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Replace NOPASSWD Finds."
-        replace:
+        ansible.builtin.replace:
             path: "{{ item }}"
             regexp: '^([^#|{% if system_is_ec2 %}ec2-user{% endif %}].*)NOPASSWD(.*)'
             replace: '\1PASSWD\2'
@@ -215,7 +215,7 @@
         when: ubtu_20_010014_sudoers_nopasswd_status.stdout | length >= 1
 
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Replace authenticate Finds."
-        replace:
+        ansible.builtin.replace:
             path: "{{ item }}"
             regexp: '^([^#].*)!authenticate(.*)'
             replace: '\1authenticate\2'
@@ -234,7 +234,7 @@
       - sudo
 
 - name: "MEDIUM | UBTU-20-010016 | PATCH | The Ubuntu operating system default filesystem permissions must be defined in such a way that all authenticated users can read and modify only their own files."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/login.defs
       regexp: '^UMASK.*'
       line: "UMASK           077"
@@ -252,13 +252,13 @@
 - name: "MEDIUM | UBTU-20-010033 | PATCH | The Ubuntu operating system must implement smart card logins for multifactor authentication for local and network access to privileged and non-privileged accounts."
   block:
       - name: "MEDIUM | UBTU-20-010033 | PATCH | The Ubuntu operating system must implement smart card logins for multifactor authentication for local and network access to privileged and non-privileged accounts. | Get pkcs11 pamd status"
-        shell: grep '^auth.*{{ ubtu20stig_pkcs11.new_control }}.*pam_pkcs11.so' /etc/pam.d/common-auth
+        ansible.builtin.shell: grep '^auth.*{{ ubtu20stig_pkcs11.new_control }}.*pam_pkcs11.so' /etc/pam.d/common-auth
         changed_when: false
         failed_when: false
         register: ubtu_20_010033_pam_pkcs11_status
 
       - name: "MEDIUM | UBTU-20-010033 | PATCH | The Ubuntu operating system must implement smart card logins for multifactor authentication for local and network access to privileged and non-privileged accounts. | Set pkcs11 if doesn't exist"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: "{{ ubtu20stig_pkcs11.type }}"
             control: "{{ ubtu20stig_pkcs11.control }}"
@@ -270,7 +270,7 @@
         when: ubtu_20_010033_pam_pkcs11_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010033 | PATCH | The Ubuntu operating system must implement smart card logins for multifactor authentication for local and network access to privileged and non-privileged accounts. | Adjust PublicKeyAuth In ssh_config."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/ssh/sshd_config
             regexp: '^#?\s*PubkeyAuthentication'
             line: "PubkeyAuthentication yes"
@@ -291,7 +291,7 @@
       - certificates
 
 - name: "MEDIUM | UBTU-20-010035 | PATCH | The Ubuntu operating system must use strong authenticators in establishing nonlocal maintenance and diagnostic sessions."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*UsePAM'
       line: "UsePAM yes"
@@ -308,7 +308,7 @@
       - sshd
 
 - name: "MEDIUM | UBTU-20-010036 | PATCH | The Ubuntu operating system must immediately terminate all network connections associated with SSH traffic after a period of inactivity."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*ClientAliveCountMax'
       line: "ClientAliveCountMax 1"
@@ -325,7 +325,7 @@
       - sshd
 
 - name: "MEDIUM | UBTU-20-010037 | PATCH | The Ubuntu operating system must automatically terminate all network connections associated with SSH traffic at the end of the session or after 10 minutes of inactivity."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*ClientAliveInterval'
       line: "ClientAliveInterval {{ ubtu20stig_sshd.client_alive_interval }}"
@@ -344,7 +344,7 @@
 - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system."
   block:
       - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Uncomment banner keyword and set banner path"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/ssh/sshd_config
             regexp: '(?i)^#?Banner'
             line: Banner /etc/issue.net
@@ -352,7 +352,7 @@
             - ubtu20stig_ssh_required
 
       - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Set banner message"
-        copy:
+        ansible.builtin.copy:
             dest: "{{ item }}"
             content: "{{ ubtu20stig_warning_banner }}"
             owner: root
@@ -363,7 +363,7 @@
             - /etc/issue.net
 
       - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Comment Out Default MOTD Info Out."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/pam.d/sshd
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -373,7 +373,7 @@
             - { regexp: '.*session.*optional.*pam_motd.so.*noupdate', line: '# session    optional     pam_motd.so noupdate' }
 
       - name: "MEDIUM | UBTU-20-010038 | PATCH | The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent Banner before granting any local or remote connection to the system. | Comment Out And Set To Off PrintLastLog."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/ssh/sshd_config
             regexp: '^#?\s*PrintLastLog'
             line: "#PrintLastLog no"
@@ -396,7 +396,7 @@
       - banner
 
 - name: "MEDIUM | UBTU-20-010043 | PATCH | The Ubuntu operating system configure the SSH daemon to use Message Authentication Codes (MACs) employing FIPS 140-2 approved cryptographic hashes to prevent the unauthorized disclosure of information and/or detect changes to information during transmission."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regex: '^MACs '
       line: "MACs {{ ubtu20stig_sshd.macs }}"
@@ -416,7 +416,7 @@
       - sshd
 
 - name: "MEDIUM | UBTU-20-010044 | PATCH | The Ubuntu operating system must configure the SSH daemon to use FIPS 140-2 approved ciphers to prevent the unauthorized disclosure of information and/or detect changes to information during transmission."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*Ciphers'
       line: "Ciphers {{ ubtu20stig_sshd.ciphers }}"
@@ -437,7 +437,7 @@
       - encryption
 
 - name: "MEDIUM | UBTU-20-010049 | PATCH | The Ubuntu operating system SSH daemon must prevent remote hosts from connecting to the proxy display."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*X11UseLocalhost'
       line: "X11UseLocalhost yes"
@@ -456,13 +456,13 @@
 - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used."
   block:
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Find the pamd settings"
-        shell: grep 'password.*requisite.*pam_pwquality.so' /etc/pam.d/common-password
+        ansible.builtin.shell: grep 'password.*requisite.*pam_pwquality.so' /etc/pam.d/common-password
         changed_when: false
         failed_when: false
         register: ubtu_20_010057_pam_pwquality_so
 
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Add retry setting if exists"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: password
             control: requisite
@@ -472,7 +472,7 @@
         when: ubtu_20_010057_pam_pwquality_so.stdout | length > 0
 
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Add retry setting if doesn't exists"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: "{{ ubtu20stig_pamd_retry.type }}"
             control: "{{ ubtu20stig_pamd_retry.control }}"
@@ -485,13 +485,13 @@
         when: ubtu_20_010057_pam_pwquality_so.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Install libpam-pwquality"
-        package:
+        ansible.builtin.package:
             name: libpam-pwquality
             state: present
         when: "'libpam-pwquality' not in ansible_facts.packages"
 
       - name: "MEDIUM | UBTU-20-010057 | PATCH | The Ubuntu operating system must be configured so that when passwords are changed or new passwords are established, pwquality must be used. | Set the enforcing setting"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/security/pwquality.conf
             regexp: '^#?\s*enforcing'
             line: 'enforcing = 1'
@@ -509,7 +509,7 @@
       - login
 
 - name: "MEDIUM | UBTU-20-010054 | PATCH | The Ubuntu operating system must enforce a minimum 15-character password length."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*minlen'
       line: "minlen = {{ ubtu20stig_password_complexity.minlen }}"
@@ -529,7 +529,7 @@
       - accounts
 
 - name: "MEDIUM | UBTU-20-010056 | PATCH | The Ubuntu operating system must prevent the use of dictionary words for passwords."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*dictcheck'
       line: 'dictcheck = {{ ubtu20stig_password_complexity.dictcheck }}'
@@ -550,7 +550,7 @@
 
 # this is out of order due to it installing needed packages for the next couple of tasks
 - name: "MEDIUM | UBTU-20-010063 | PATCH | The Ubuntu operating system must implement multifactor authentication for remote access to privileged accounts in such a way that one of the factors is provided by a device separate from the system gaining access."
-  package:
+  ansible.builtin.package:
       name: libpam-pkcs11
       state: present
   when:
@@ -568,7 +568,7 @@
 
 # this is out of order due to it installing needed packages for the next couple of tasks
 - name: "MEDIUM | UBTU-20-010064 | PATCH | The Ubuntu operating system must accept Personal Identity Verification (PIV) credentials."
-  package:
+  ansible.builtin.package:
       name: opensc-pkcs11
       state: present
   when:
@@ -586,24 +586,24 @@
 - name: "MEDIUM | UBTU-20-010060 | AUDIT | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor."
   block:
       - name: "MEDIUM | UBTU-20-010060 | AUDIT | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Find Section for Default Pkcs11 Module."
-        shell: grep -ozP 'pkcs11_module default([\S\s]*?)}' {{ pam_pkcs11_location.stdout }}
+        ansible.builtin.shell: grep -ozP 'pkcs11_module default([\S\s]*?)}' {{ pam_pkcs11_location.stdout }}
         changed_when: false
         failed_when: false
         register: ubtu_20_010060_default_pkcs11_module_output
 
       - name: "MEDIUM | UBTU-20-010060 | AUDIT | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Set_fact"
-        set_fact:
+        ansible.builtin.set_fact:
             ubtu_20_010060_default_pkcs11_module_line: "{{ ubtu_20_010060_default_pkcs11_module_output.stdout | regex_search('.*cert_policy.*') | string }}"
 
       - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Add Ca to line If not present."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '^(.*)none(.*)$'
             replace: '\1ca\2'
         when: "'none' in ubtu_20_010060_default_pkcs11_module_line"
 
       - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Fix Commented out line and add ca."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '#?\s*cert_policy.*'
             replace: '  cert_policy = ca;'
@@ -612,7 +612,7 @@
         when: "'#' in ubtu_20_010060_default_pkcs11_module_line"
 
       - name: "MEDIUM | UBTU-20-010060 | PATCH | The Ubuntu operating system, for PKI-based authentication, must validate certificates by constructing a certification path (which includes status information) to an accepted trust anchor. | Line Already Exisits No Ca."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '(\s*cert_policy\s*= )(?!.*ca)(.*);'
             replace: '\1ca,\2;'
@@ -629,7 +629,7 @@
       - certificates
 
 - name: "MEDIUM | UBTU-20-010065 | PATCH | The Ubuntu operating system must electronically verify Personal Identity Verification (PIV) credentials."
-  replace:
+  ansible.builtin.replace:
       path: "{{ pam_pkcs11_location.stdout }}"
       regexp: '(\s*cert_policy\s*= )(?!.*ocsp_on)(.*);'
       replace: '\1ocsp_on,\2;'
@@ -647,7 +647,7 @@
 - name: "MEDIUM | UBTU-20-010066 | AUDIT | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network."
   block:
       - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove crl_auto when it does not match variable set."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '(crl_auto,|crl_auto)'
             replace: ''
@@ -657,7 +657,7 @@
             - "'crl_offline' in ubtu20stig_crl_setting_cert_policy"
 
       - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Remove crl_offline when it does not match variable set."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '(crl_offline,|crl_offline)'
             replace: ''
@@ -667,7 +667,7 @@
             - "'crl_auto' in ubtu20stig_crl_setting_cert_policy"
 
       - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Update Policy crl_auto."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '(\s*cert_policy\s*= )(?!.*crl_auto)(.*);'
             replace: '\1{{ ubtu20stig_crl_setting_cert_policy }},\2;'
@@ -675,7 +675,7 @@
             - "'crl_auto' in ubtu20stig_crl_setting_cert_policy"
 
       - name: "MEDIUM | UBTU-20-010066 | PATCH | The Ubuntu operating system for PKI-based authentication, must implement a local cache of revocation data in case of the inability to access revocation information via the network. | Update Policy crl_offline."
-        replace:
+        ansible.builtin.replace:
             path: "{{ pam_pkcs11_location.stdout }}"
             regexp: '(\s*cert_policy\s*= )(?!.*crl_offline)(.*);'
             replace: '\1{{ ubtu20stig_crl_setting_cert_policy }},\2;'
@@ -697,17 +697,17 @@
       - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Custom Daily SHA1."
         block:
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Get Current SHA1 On Daily AIDE daily."
-              command: sha1sum /etc/cron.daily/aide
+              ansible.builtin.command: sha1sum /etc/cron.daily/aide
               changed_when: false
               failed_when: false
               register: ubtu20stig_aide_sha1_current_daily
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Set Fact Daily."
-              set_fact:
+              ansible.builtin.set_fact:
                   ubtu20stig_daily_sha1: "{{ ubtu20stig_aide_sha1_current_daily.stdout | regex_replace('(\\s*\/etc.*)','') }}"
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning AIDE Not Setup Here."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! There is no AIDE script in the daily cron folder. Please add the script to the monthly"
                       - "folder to properly complaint with your settings you have choosen as well as STIG standards."
@@ -715,7 +715,7 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length == 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning SHA1 Custom Does not Match Daily."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! The following SHA1 value {{ ubtu20stig_custom_sha1_for_aide }} for"
                       - "your defined daily custom AIDE cron script file does not match the current "
@@ -727,7 +727,7 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -741,17 +741,17 @@
       - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Custom Monthly SHA1 Check."
         block:
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Get Current SHA1 On Daily AIDE monthly."
-              command: sha1sum /etc/cron.monthly/aide
+              ansible.builtin.command: sha1sum /etc/cron.monthly/aide
               changed_when: false
               failed_when: false
               register: ubtu20stig_aide_sha1_current_monthly
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Set Fact Monthly."
-              set_fact:
+              ansible.builtin.set_fact:
                   ubtu20stig_monthly_sha1: "{{ ubtu20stig_aide_sha1_current_monthly.stdout | regex_replace('(\\s*\/etc.*)','') }}"
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning AIDE Not Setup Here."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! There is no AIDE script in the monthly cron folder. Please add the script to the monthly"
                       - "folder to properly complaint with your settings you have choosen as well as STIG standards."
@@ -759,7 +759,7 @@
                   - ubtu20stig_aide_sha1_current_monthly.stdout | length == 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning SHA1 Custom Does not Match Monthly."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! The following SHA1 value {{ ubtu20stig_custom_sha1_for_aide }} for"
                       - "your defined monthly custom AIDE cron script file does not match the current "
@@ -771,7 +771,7 @@
                   - ubtu20stig_aide_sha1_current_monthly.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -785,17 +785,17 @@
       - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | No Custom AIDE Script Default Setup."
         block:
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Get Current SHA1 On Daily AIDE daily."
-              command: sha1sum /etc/cron.daily/aide
+              ansible.builtin.command: sha1sum /etc/cron.daily/aide
               changed_when: false
               failed_when: false
               register: ubtu20stig_aide_sha1_current_daily
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Set Fact Daily."
-              set_fact:
+              ansible.builtin.set_fact:
                   ubtu20stig_daily_sha1: "{{ ubtu20stig_aide_sha1_current_daily.stdout | regex_replace('(\\s*\/etc.*)','') }}"
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning AIDE Not Setup Here."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! There is no AIDE script in the daily cron folder. Please add the script to the daily cron"
                       - "folder by coping it or reinstalling aide to properly complaint with STIG standards."
@@ -803,7 +803,7 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length == 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warning SHA1 Custom Does not Match Monthly."
-              debug:
+              ansible.builtin.debug:
                   msg:
                       - "Warning!! The following is the SHA1 value {{ ubtu20stig_daily_sha1 }} for"
                       - "daily AIDE cron script file. Please verify it meets the current default AIDE cron script"
@@ -813,7 +813,7 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -834,7 +834,7 @@
       - aide
 
 - name: "MEDIUM | UBTU-20-010100 | PATCH |  The Ubuntu operating system must generate audit records for all account creations, modifications, disabling, and termination events that affect /etc/passwd."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -855,7 +855,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010101 | PATCH | The Ubuntu operating system must generate audit records for all account creations, modifications, disabling, and termination events that affect /etc/group."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -876,7 +876,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010102 | PATCH | The Ubuntu operating system must generate audit records for all account creations, modifications, disabling, and termination events that affect /etc/shadow."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -897,7 +897,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010103 | PATCH | The Ubuntu operating system must generate audit records for all account creations, modifications, disabling, and termination events that affect /etc/gshadow."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -917,7 +917,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010104 | PATCH | The Ubuntu operating system must generate audit records for all account creations, modifications, disabling, and termination events that affect /etc/opasswd."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -938,7 +938,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010117 | PATCH | The Ubuntu operating system must alert the ISSO and SA (at a minimum) in the event of an audit processing failure."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/audit/auditd.conf
       regexp: '^action_mail_acct ='
       line: "action_mail_acct = {{ ubtu20stig_auditd_mail_acct }}"
@@ -959,7 +959,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010118 | PATCH | The Ubuntu operating system must shut down by default upon audit failure (unless availability is an overriding concern)."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/audit/auditd.conf
       regexp: '^disk_full_action ='
       line: "disk_full_action = {{ ubtu20stig_auditd_disk_full_action }}"
@@ -978,14 +978,14 @@
 - name: "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users."
   block:
       - name: "MEDIUM | UBTU-20-010122 | AUDIT | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Get File Permissions."
-        shell: find {{ ubtu_20_audit_log_path.stdout }} -type f -perm -600 ! -perm 600
+        ansible.builtin.shell: find {{ ubtu_20_audit_log_path.stdout }} -type f -perm -600 ! -perm 600
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010122_audit_log_files_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010122 | PATCH | The Ubuntu operating system must be configured so that audit log files are not read or write-accessible by unauthorized users. | Adjust Aduit Log Files If Higher Then 0600."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_audit_log_files_permissions }}"
         with_items:
@@ -1012,7 +1012,7 @@
       - name: |
           "MEDIUM | UBTU-20-010123 | AUDIT | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Find Files."
           "MEDIUM | UBTU-20-010124 | AUDIT | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Find Files."
-        shell: find {{ ubtu_20_audit_log_path.stdout }} -type f ! -user root -o -type f ! -group root
+        ansible.builtin.shell: find {{ ubtu_20_audit_log_path.stdout }} -type f ! -user root -o -type f ! -group root
         become: true
         changed_when: false
         failed_when: false
@@ -1021,7 +1021,7 @@
       - name: |
           "MEDIUM | UBTU-20-010123 | PATCH | The Ubuntu operating system must be configured to permit only authorized users ownership of the audit log files. | Set Permissions."
           "MEDIUM | UBTU-20-010124 | PATCH | The Ubuntu operating system must permit only authorized groups ownership of the audit log files. | Set Permissions."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010123 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010124 | ternary('root',omit) }}"
@@ -1049,14 +1049,14 @@
 - name: "MEDIUM | UBTU-20-010128 | PATCH | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users."
   block:
       - name: "MEDIUM | UBTU-20-010128 | AUDIT | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users. | Find Log directory Permissions."
-        shell: find {{ ubtu_20_audit_log_path.stdout }} -type d -perm -750 ! -perm 750
+        ansible.builtin.shell: find {{ ubtu_20_audit_log_path.stdout }} -type d -perm -750 ! -perm 750
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010128_audit_log_dir_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010128 | PATCH | The Ubuntu operating system must be configured so that the audit log directory is not write-accessible by unauthorized users. | Fix Log Directory Permissions."
-        file:
+        ansible.builtin.file:
             path: "{{ ubtu_20_audit_log_path.stdout }}"
             mode: "{{ ubtu20stig_audit_log_dir_permission }}"
             state: directory
@@ -1077,14 +1077,14 @@
 - name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users."
   block:
       - name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Create List."
-        shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f -perm -640 ! -perm 640
+        ansible.builtin.shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f -perm -640 ! -perm 640
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010133_audit_config_files_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010133 | PATCH | The Ubuntu operating system must be configured so that audit configuration files are not write-accessible by unauthorized users. | Set User Write Permissions."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_audit_file_permissions }}"
         with_items:
@@ -1109,7 +1109,7 @@
       - name: |
           "MEDIUM | UBTU-20-010134 | PATCH | The Ubuntu operating system must permit only authorized accounts to own the audit configuration files. | Create List."
           "MEDIUM | UBTU-20-010135 | PATCH | The Ubuntu operating system must permit only authorized groups to own the audit configuration files. | Create List."
-        shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f ! -user root -o -type f ! -group root
+        ansible.builtin.shell: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/* -type f ! -user root -o -type f ! -group root
         become: true
         changed_when: false
         failed_when: false
@@ -1118,7 +1118,7 @@
       - name: |
           "MEDIUM | UBTU-20-010134 | PATCH | The Ubuntu operating system must permit only authorized accounts to own the audit configuration files. | Set Account Owner."
           "MEDIUM | UBTU-20-010135 | PATCH | The Ubuntu operating system must permit only authorized groups to own the audit configuration files. | Set Group Owner."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010134 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010135 | ternary('root',omit) }}"
@@ -1142,7 +1142,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010136 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the su command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1158,7 +1158,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010137 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chfn command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1174,7 +1174,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010138 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the mount command"
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1190,7 +1190,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010139 | PATCH |  The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the umount command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1206,7 +1206,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010140 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the ssh-agent command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1222,7 +1222,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010141 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the ssh-keysign command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1238,7 +1238,7 @@
       - aduitd
 
 - name: "MEDIUM | UBTU-20-010142 | PATCH | The Ubuntu operating system must generate audit records for any use of the setxattr, fsetxattr, lsetxattr, removexattr, fremovexattr, and lremovexattr system calls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1254,7 +1254,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010148 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chown, fchown, fchownat, and lchown system calls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1270,7 +1270,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010152 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chmod, fchmod, and fchmodat system calls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1286,7 +1286,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010155 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the creat, open, openat, open_by_handle_at, truncate, and ftruncate system calls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1302,7 +1302,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010161 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the sudo command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1318,7 +1318,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010162 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the sudoedit command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1334,7 +1334,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010163 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chsh command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1350,7 +1350,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010164 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the newgrp command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1366,7 +1366,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010165 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chcon command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1382,7 +1382,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010166 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the apparmor_parser command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1398,7 +1398,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010167 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the setfacl command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1414,7 +1414,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010168 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chacl command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1430,7 +1430,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010169 | PATCH | The Ubuntu operating system must generate audit records for the use and modification of the tallylog file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1446,7 +1446,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010170 | PATCH | The Ubuntu operating system must generate audit records for the use and modification of faillog file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc//99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1462,7 +1462,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010171 | PATCH | The Ubuntu operating system must generate audit records for the use and modification of the lastlog file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1478,7 +1478,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010172 | PATCH |  The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the passwd command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1494,7 +1494,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010173 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the unix_update command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1510,7 +1510,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010174 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the gpasswd command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1526,7 +1526,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010175 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the chage command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1542,7 +1542,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010176 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the usermod command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1558,7 +1558,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010177 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the crontab command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1574,7 +1574,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010178 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the pam_timestamp_check command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1590,7 +1590,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010179 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the init_module and finit_module syscalls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1606,7 +1606,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010181 | PATCH | The Ubuntu operating system must generate audit records for successful/unsuccessful uses of the delete_module syscall."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1622,7 +1622,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010182 | PATCH | The Ubuntu operating system must produce audit records and reports containing information to establish when, where, what type, the source, and the outcome for all DoD-defined auditable events and actions in near real time."
-  systemd:
+  ansible.builtin.systemd:
       name: auditd
       state: started
       enabled: true
@@ -1660,13 +1660,13 @@
 - name: "MEDIUM | UBTU-20-010198 | PATCH | The Ubuntu operating system must initiate session audits at system startup."
   block:
       - name: "MEDIUM | UBTU-20-010198 | AUDIT | The Ubuntu operating system must initiate session audits at system startup. | Get GRUB_CMDLINE_LINUX"
-        shell: grep "GRUB_CMDLINE_LINUX=" /etc/default/grub | cut -f2 -d'"'
+        ansible.builtin.shell: grep "GRUB_CMDLINE_LINUX=" /etc/default/grub | cut -f2 -d'"'
         changed_when: false
         failed_when: false
         register: ubtu_20_010198_cmdline_settings
 
       - name: "MEDIUM | UBTU-20-010198 | PATCH | The Ubuntu operating system must initiate session audits at system startup. | Add setting if audit doesn't exist"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/default/grub
             regexp: '^GRUB_CMDLINE_LINUX='
             line: 'GRUB_CMDLINE_LINUX="{{ ubtu_20_010198_cmdline_settings.stdout }} audit=1"'
@@ -1674,7 +1674,7 @@
         when: "'audit=' not in ubtu_20_010198_cmdline_settings.stdout"
 
       - name: "MEDIUM | UBTU-20-010198 | PATCH | The Ubuntu operating system must initiate session audits at system startup. | Add setting if audit exists"
-        replace:
+        ansible.builtin.replace:
             path: /etc/default/grub
             regexp: 'audit=([0-9]+)'
             replace: 'audit=1'
@@ -1694,14 +1694,14 @@
 - name: "MEDIUM | UBTU-20-010199 | PATCH | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010199 | Audit | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Obtain Files Not With 755 Or Less."
-        shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f -perm -755 ! -perm 755
+        ansible.builtin.shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f -perm -755 ! -perm 755
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010199_file_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010199 | Audit | The Ubuntu operating system must configure audit tools with a mode of 0755 or less permissive. | Adjust Audit Tool If higher then 0755."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_audit_tool_permissions }}"
         with_items:
@@ -1727,7 +1727,7 @@
       - name: |
           "MEDIUM | UBTU-20-010200 | AUDIT | The Ubuntu operating system must configure audit tools to be owned by root. | Find Non-Root Files."
           "MEDIUM | UBTU-20-010201 | AUDIT | The Ubuntu operating system must configure the audit tools to be group-owned by root. | Find Non-Root Files."
-        shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f ! -user root -o -type f ! -group root
+        ansible.builtin.shell: find /sbin/auditctl /sbin/aureport /sbin/ausearch /sbin/autrace /sbin/auditd /sbin/audispd /sbin/augenrules -type f ! -user root -o -type f ! -group root
         changed_when: false
         failed_when: false
         register: ubtu_20_010200_root_permissions_audit
@@ -1735,7 +1735,7 @@
       - name: |
           "MEDIUM | UBTU-20-010200 | PATCH | The Ubuntu operating system must configure audit tools to be owned by root. | Assign Root To File."
           "MEDIUM | UBTU-20-010201 | PATCH | The Ubuntu operating system must configure the audit tools to be group-owned by root. | Assign Root To File."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010200 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010201 | ternary('root',omit) }}"
@@ -1760,7 +1760,7 @@
       - permissions
 
 - name: "MEDIUM | UBTU-20-010205 | PATCH | The Ubuntu operating system must use cryptographic mechanisms to protect the integrity of audit tools."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/aide/aide.conf
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }} "
@@ -1788,7 +1788,7 @@
       - aide
 
 - name: "MEDIUM | UBTU-20-010211 | PATCH | The Ubuntu operating system must prevent all software from executing at higher privilege levels than users executing the software and the audit system must be configured to audit the execution of privileged functions."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1805,7 +1805,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010244 | PATCH | The Ubuntu operating system must generate audit records for privileged activities, nonlocal maintenance, diagnostic sessions and other system-level access."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1822,7 +1822,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010267 | PATCH |  The Ubuntu operating system must generate audit records for any successful/unsuccessful use of unlink, unlinkat, rename, renameat, and rmdir system calls."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1838,7 +1838,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010277 | PATCH |  The Ubuntu operating system must generate audit records for the /var/log/wtmp file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1854,7 +1854,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010278 | PATCH | The Ubuntu operating system must generate audit records for the /var/run/utmp file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1870,7 +1870,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010279 | PATCH | The Ubuntu operating system must generate audit records for the /var/log/btmp file."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1886,7 +1886,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010296 | PATCH | The Ubuntu operating system must generate audit records when successful/unsuccessful attempts to use modprobe command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1902,7 +1902,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010297 | PATCH | The Ubuntu operating system must generate audit records when successful/unsuccessful attempts to use the kmod command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1918,7 +1918,7 @@
       - auditd
 
 - name: "MEDIUM | UBTU-20-010298 | PATCH | The Ubuntu operating system must generate audit records when successful/unsuccessful attempts to use the fdisk command."
-  debug:
+  ansible.builtin.debug:
       msg: "Control being set via Handler 'update auditd' which writes to /etc/audit.d/99_stig_auditd.rules"
   changed_when: true
   notify: update auditd
@@ -1936,13 +1936,13 @@
 - name: "MEDIUM | UBTU-20-010403 | PATCH |  The Ubuntu operating system must monitor remote access methods."
   block:
       - name: "MEDIUM | UBTU-20-010403 | PATCH | The Ubuntu operating system must monitor remote access methods. | Get existing files"
-        shell: grep -E -r '^(auth,authpriv\.\*|daemon\.\*)' /etc/rsyslog.* | cut -d':' -f1
+        ansible.builtin.shell: grep -E -r '^(auth,authpriv\.\*|daemon\.\*)' /etc/rsyslog.* | cut -d':' -f1
         changed_when: false
         failed_when: false
         register: ubtu_20_010403_existing_files
 
       - name: "MEDIUM | UBTU-20-010403 | PATCH | The Ubuntu operating system must monitor remote access methods. | Set settings"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: "{{ (ubtu_20_010403_existing_files.stdout | length > 0) | ternary(ubtu_20_010403_existing_files.stdout,'/etc/rsyslog.d/50-default.conf') }}"
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -1968,13 +1968,13 @@
 - name: "MEDIUM | UBTU-20-010404 | PATCH | The Ubuntu operating system must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm."
   block:
       - name: "MEDIUM | UBTU-20-010404 | AUDIT | The Ubuntu operating system must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm. | Get status of pam_unix.so"
-        shell: grep 'password.*{{ ubtu20stig_pamd_encryption.new_control }}.*pam_unix.so' /etc/pam.d/common-password
+        ansible.builtin.shell: grep 'password.*{{ ubtu20stig_pamd_encryption.new_control }}.*pam_unix.so' /etc/pam.d/common-password
         changed_when: false
         failed_when: false
         register: ubtu_20_010404_pam_unix_so
 
       - name: "MEDIUM | UBTU-20-010404 | PATCH | The Ubuntu operating system must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm. | Add encryption if pam_unix exists"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: password
             control: "{{ ubtu20stig_pamd_encryption.new_control }}"
@@ -1984,7 +1984,7 @@
         when: ubtu_20_010404_pam_unix_so.stdout | length > 0
 
       - name: "MEDIUM | UBTU-20-010404 | PATCH | The Ubuntu operating system must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm. | Add encryption if pam_unix doesn't exists"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: "{{ ubtu20stig_pamd_encryption.type }}"
             control: "{{ ubtu20stig_pamd_encryption.control }}"
@@ -1997,7 +1997,7 @@
         when: ubtu_20_010404_pam_unix_so.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010404 | PATCH | The Ubuntu operating system must encrypt all stored passwords with a FIPS 140-2 approved cryptographic hashing algorithm. | Add ENCRYPT_METHOD"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/login.defs
             regexp: '^ENCRYPT_METHOD'
             line: "ENCRYPT_METHOD {{ ubtu20stig_login_defaults.encrypt_method }}"
@@ -2016,11 +2016,11 @@
 - name: "MEDIUM | UBTU-20-010407 | AUDIT | The Ubuntu operating system must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments."
   block:
       - name: "MEDIUM | UBTU-20-010407 | AUDIT | The Ubuntu operating system must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments. | Message out warning"
-        debug:
+        ansible.builtin.debug:
             msg: "Warning!! Please make sure your UFW allow/deny settings conform to PPSM CAL vulnerability assessments"
 
       - name: The Ubuntu operating system must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010407'
   when:
@@ -2036,7 +2036,7 @@
       - ufw
 
 - name: "MEDIUM | UBTU-20-010408 | PATCH | The Ubuntu operating system must prevent direct login into the root account."
-  user:
+  ansible.builtin.user:
       name: root
       password_lock: true
   when:
@@ -2053,13 +2053,13 @@
 - name: "MEDIUM | UBTU-20-010409 | PATCH | The Ubuntu operating system must disable account identifiers (individuals, groups, roles, and devices) after 35 days of inactivity."
   block:
       - name: "MEDIUM | UBTU-20-010409 | AUDIT | The Ubuntu operating system must disable account identifiers (individuals, groups, roles, and devices) after 35 days of inactivity. | Get useradd inactive value"
-        shell: grep '^INACTIVE' /etc/default/useradd | cut -d"=" -f2
+        ansible.builtin.shell: grep '^INACTIVE' /etc/default/useradd | cut -d"=" -f2
         changed_when: false
         failed_when: false
         register: ubtu_20_010409_useradd_inactive
 
       - name: "MEDIUM | UBTU-20-010409 | PATCH | The Ubuntu operating system must disable account identifiers (individuals, groups, roles, and devices) after 35 days of inactivity. | Set INACTIVE"
-        shell: useradd -D -f {{ ubtu20stig_useradd_active }}
+        ansible.builtin.shell: useradd -D -f {{ ubtu20stig_useradd_active }}
         changed_when: true
         when:
             - ubtu_20_010409_useradd_inactive.stdout | length == 0 or
@@ -2079,13 +2079,13 @@
 - name: "MEDIUM | UBTU-20-010411 | PATCH | The Ubuntu operating system must set a sticky bit on all public directories to prevent unauthorized and unintended information transferred via shared system resources."
   block:
       - name: "MEDIUM | UBTU-20-010411 | PATCH | The Ubuntu operating system must set a sticky bit on all public directories to prevent unauthorized and unintended information transferred via shared system resources. | Find world-writable directories"
-        shell: "find / -type d \\( -perm -002 ! -perm -1000 \\) -print 2>/dev/null | sed 's/.* //'"
+        ansible.builtin.shell: "find / -type d \\( -perm -002 ! -perm -1000 \\) -print 2>/dev/null | sed 's/.* //'"
         changed_when: false
         failed_when: false
         register: ubtu_20_010411_world_writable_directories
 
       - name: "MEDIUM | UBTU-20-010411 | PATCH | The Ubuntu operating system must set a sticky bit on all public directories to prevent unauthorized and unintended information transferred via shared system resources. | Add sticky bit to world-writable directories"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: '1777'
         with_items:
@@ -2106,7 +2106,7 @@
 - name: "MEDIUM | UBTU-20-010412 | PATCH | The Ubuntu operating system must be configured to use TCP syncookies."
   block:
       - name: "MEDIUM | UBTU-20-010412 | PATCH | The Ubuntu operating system must be configured to use TCP syncookies. | Set syncookies current"
-        sysctl:
+        ansible.posix.sysctl:
             name: net.ipv4.tcp_syncookies
             value: '1'
             sysctl_set: true
@@ -2116,7 +2116,7 @@
         notify: sysctl flush ipv4 route table
 
       - name: "MEDIUM | UBTU-20-010412 | PATCH | The Ubuntu operating system must be configured to use TCP syncookies."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/sysctl.conf
             regexp: '^#?\s*net.ipv4.tcp_syncookies'
             line: "net.ipv4.tcp_syncookies = 1"
@@ -2132,7 +2132,7 @@
       - tcp
 
 - name: "MEDIUM | UBTU-20-010413 | PATCH | The Ubuntu operating system must disable kernel core dumps so that it can fail to a secure state if system initialization fails, shutdown fails or aborts fail."
-  systemd:
+  ansible.builtin.systemd:
       name: kdump
       state: stopped
       enabled: false
@@ -2153,32 +2153,32 @@
 - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest."
   block:
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Get encrypted partitions"
-        shell: more /etc/crypttab | sed 1d
+        ansible.builtin.shell: more /etc/crypttab | sed 1d
         changed_when: false
         failed_when: false
         register: ubtu_20_010414_crypttab_status
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Alert no partitions are encrypted"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! There are no encrypted partitions. Please make sure all permanent partitions are encrypted"
         when: ubtu_20_010414_crypttab_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010414'
         when: ubtu_20_010414_crypttab_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Alert no partitions are encrypted"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Please review that no permanent partitions are missing. All permanent partitions need to be encrypted"
                 - "{{ ubtu_20_010414_crypttab_status.stdout_lines }}"
         when: ubtu_20_010414_crypttab_status.stdout | length > 0
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010414'
         when: ubtu_20_010414_crypttab_status.stdout | length > 0
@@ -2197,14 +2197,14 @@
 - name: "MEDIUM | UBTU-20-010416 | PATCH | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries."
   block:
       - name: "MEDIUM | UBTU-20-010416 | AUDIT | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries. | Audit Files For Permissions"
-        shell: find /var/log ! -name '*[bw]tmp' ! -name '*lastlog' -type f -perm -640 ! -perm 640 -exec stat -c "%n" {} \;
+        ansible.builtin.shell: find /var/log ! -name '*[bw]tmp' ! -name '*lastlog' -type f -perm -640 ! -perm 640 -exec stat -c "%n" {} \;
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010416_var_log_file_permissions
 
       - name: "MEDIUM | UBTU-20-010416 | PATCH | The Ubuntu operating system must generate error messages that provide information necessary for corrective actions without revealing information that could be exploited by adversaries. | Fix files"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_var_log_file_perms }}"
         with_items:
@@ -2225,7 +2225,7 @@
 - name: |
     "MEDIUM | UBTU-20-010417 | PATCH | The Ubuntu operating system must configure the /var/log directory to be group-owned by syslog."
     "MEDIUM | UBTU-20-010418 | PATCH | The Ubuntu operating system must configure the /var/log directory to be owned by root."
-  file:
+  ansible.builtin.file:
       path: /var/log
       owner: "{{ ubtu_20_010418 | ternary('root',omit) }}"
       group: "{{ ubtu_20_010417 | ternary('syslog',omit) }}"
@@ -2248,14 +2248,14 @@
 - name: "MEDIUM | UBTU-20-010419 | PATCH | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010419 | AUDIT | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive. | Find Dir Permissions."
-        shell: stat -c "%a" /var/log
+        ansible.builtin.shell: stat -c "%a" /var/log
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010419_var_log_dir_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010419 | PATCH | The Ubuntu operating system must configure the /var/log directory to have mode 0755 or less permissive. | Change Log Dir Permissions."
-        file:
+        ansible.builtin.file:
             path: /var/log
             mode: "{{ ubtu20stig_var_log_perms }}"
             state: directory
@@ -2275,7 +2275,7 @@
 - name: |
     "MEDIUM | UBTU-20-010420 | PATCH | The Ubuntu operating system must configure the /var/log/syslog file to be group-owned by adm."
     "MEDIUM | UBTU-20-010421 | PATCH | he Ubuntu operating system must configure /var/log/syslog file to be owned by syslog."
-  file:
+  ansible.builtin.file:
       path: /var/log/syslog
       owner: "{{ ubtu_20_010421 | ternary('syslog',omit) }}"
       group: "{{ ubtu_20_010420 | ternary('adm',omit) }}"
@@ -2297,14 +2297,14 @@
 - name: "MEDIUM | UBTU-20-010422 | PATCH | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010422 | AUDIT | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive. | Find Dir Permissions."
-        shell: stat -c "%a" /var/log/syslog
+        ansible.builtin.shell: stat -c "%a" /var/log/syslog
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010422_var_log_syslog_dir_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010422 | PATCH | The Ubuntu operating system must configure /var/log/syslog file with mode 0640 or less permissive. | Change SysLog Dir Permissions."
-        file:
+        ansible.builtin.file:
             path: /var/log/syslog
             mode: "{{ ubtu20stig_var_log_syslog_perms }}"
         when:
@@ -2323,14 +2323,14 @@
 - name: "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010423 | AUDIT | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Get OS command directories with mode more than 755"
-        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -type d -perm -755 ! -perm 755
+        ansible.builtin.shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -type d -perm -755 ! -perm 755
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010423_command_dir_permissions_audit
 
       - name: "MEDIUM | UBTU-20-010423 | PATCH | The Ubuntu operating system must have directories that contain system commands set to a mode of 0755 or less permissive. | Set Dir Permissions."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_sys_comm_dir_perms }}"
             state: directory
@@ -2354,7 +2354,7 @@
       - name: |
           "MEDIUM | UBTU-20-010424 | AUDIT | The Ubuntu operating system must have directories that contain system commands owned by root. | Get OS command dirs not owned by root"
           "MEDIUM | UBTU-20-010425 | AUDIT | The Ubuntu operating system must have directories that contain system commands group-owned by root. | Get OS command dirs not group-owned by root"
-        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root \) -type d -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root \) -type d -exec stat -c "%n" '{}' \;
         become: true
         changed_when: false
         failed_when: false
@@ -2363,7 +2363,7 @@
       - name: |
           "MEDIUM | UBTU-20-010424 | PATCH | The Ubuntu operating system must have directories that contain system commands owned by root. | Set OS command dirs not owned by root to root"
           "MEDIUM | UBTU-20-010425 | PATCH | The Ubuntu operating system must have directories that contain system commands group-owned by root. | Set OS command dirs not group-owned by root to root"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010424 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010425 | ternary('root',omit) }}"
@@ -2390,14 +2390,14 @@
 - name: "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010426 | AUDIT | The Ubuntu operating system library files must have mode 0755 or less permissive. | Get List."
-        shell: find -L /lib/* /lib64/* /usr/lib/* -type f -perm -755 ! -perm 755
+        ansible.builtin.shell: find -L /lib/* /lib64/* /usr/lib/* -type f -perm -755 ! -perm 755
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010426_lib_files
 
       - name: "MEDIUM | UBTU-20-010426 | PATCH | The Ubuntu operating system library files must have mode 0755 or less permissive. | Update Permissions."
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_lib_file_perms }}"
         with_items:
@@ -2418,13 +2418,13 @@
 - name: "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive."
   block:
       - name: "MEDIUM | UBTU-20-010427 | AUDIT | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Get library directories with 755 or less"
-        shell: find -L /lib /lib64 /usr/lib -type d -perm -755 ! -perm 755
+        ansible.builtin.shell: find -L /lib /lib64 /usr/lib -type d -perm -755 ! -perm 755
         changed_when: false
         failed_when: false
         register: ubtu_20_010427_lib_dirs
 
       - name: "MEDIUM | UBTU-20-010427 | PATCH | The Ubuntu operating system library directories must have mode 0755 or less permissive. | Set library directories with 755 or more restrictive"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             mode: "{{ ubtu20stig_lib_dir_perms }}"
             state: directory
@@ -2450,7 +2450,7 @@
       - name: |
           "MEDIUM | UBTU-20-010428 | AUDIT | The Ubuntu operating system library files must be owned by root. | Get library files not owned by root"
           "MEDIUM | UBTU-20-010430 | AUDIT | The Ubuntu operating system library files must be group-owned by root. | Get library files not group-owned by root"
-        shell: find -L /lib /lib64 /usr/lib -type f ! -user root -o -type f ! -group root
+        ansible.builtin.shell: find -L /lib /lib64 /usr/lib -type f ! -user root -o -type f ! -group root
         become: true
         changed_when: false
         failed_when: false
@@ -2459,7 +2459,7 @@
       - name: |
           "MEDIUM | UBTU-20-010428 | PATCH | The Ubuntu operating system library files must be owned by root. | Set library files to be owned by root"
           "MEDIUM | UBTU-20-010430 | PATCH | The Ubuntu operating system library files must be group-owned by root. | Set library files not group-owned by root"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010428 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010430 | ternary('root',omit) }}"
@@ -2489,7 +2489,7 @@
       - name: |
           "MEDIUM | UBTU-20-010429 | AUDIT | The Ubuntu operating system library directories must be owned by root. | Get OS library directories not owned by root"
           "MEDIUM | UBTU-20-010431 | AUDIT | The Ubuntu operating system library directories must be group-owned by root. | Get OS library directories not group-owned by root"
-        shell: find -L /lib /lib64 /usr/lib -type d ! -user root -o -type d ! -group root
+        ansible.builtin.shell: find -L /lib /lib64 /usr/lib -type d ! -user root -o -type d ! -group root
         become: true
         changed_when: false
         failed_when: false
@@ -2498,7 +2498,7 @@
       - name: |
           "MEDIUM | UBTU-20-010429 | PATCH | The Ubuntu operating system library directories must be owned by root. | Set OS library directories not owned by root"
           "MEDIUM | UBTU-20-010431 | PATCH | The Ubuntu operating system library directories must be group-owned by root. | Set OS library directories not group-owned by root"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010429 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010431 | ternary('root',omit) }}"
@@ -2523,7 +2523,7 @@
       - permissions
 
 - name: "MEDIUM | UBTU-20-010432 | PATCH | The Ubuntu operating system must be configured to preserve log records from failure events."
-  service:
+  ansible.builtin.service:
       name: rsyslog
       state: started
       enabled: true
@@ -2539,7 +2539,7 @@
       - rsyslog
 
 - name: "MEDIUM | UBTU-20-010433 | PATCH | The Ubuntu operating system must have an application firewall installed in order to control remote access methods."
-  package:
+  ansible.builtin.package:
       name: ufw
       state: present
   when:
@@ -2557,7 +2557,7 @@
 - name: |
         "MEDIUM | UBTU-20-010434 | PATCH | The Ubuntu operating system must enable and run the uncomplicated firewall(ufw)."
         "MEDIUM | UBTU-20-010454 | PATCH | The Ubuntu operating system must have an application firewall enabled."
-  systemd:
+  ansible.builtin.systemd:
       name: ufw
       state: started
       enabled: true
@@ -2579,7 +2579,7 @@
       - ufw
 
 - name: "MEDIUM | UBTU-20-010435 | PATCH | The Ubuntu operating system must, for networked systems, compare internal information system clocks at least every 24 hours with a server which is synchronized to one of the redundant United States Naval Observatory (USNO) time servers, or a time server designated for the appropriate DoD network (NIPRNet/SIPRNet), and/or the Global Positioning System (GPS)."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/chrony/chrony.conf
       regexp: '^server {{ item }} iburst'
       line: "server {{ item }} iburst maxpoll {{ ubtu20stig_iburst_maxpoll_value }}"
@@ -2597,7 +2597,7 @@
       - chrony
 
 - name: "MEDIUM | UBTU-20-010437 | PATCH | The Ubuntu operating system must notify designated personnel if baseline configurations are changed in an unauthorized manner. The file integrity tool must notify the system administrator when changes to the baseline configuration or anomalies in the operation of any security functions are discovered."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/default/aide
       regexp: '^#?\s*SILENTREPORTS='
       line: "SILENTREPORTS=no"
@@ -2621,13 +2621,13 @@
 - name: "MEDIUM | UBTU-20-010438 | PATCH | The Ubuntu operating system's Advance Package Tool (APT) must be configured to prevent the installation of patches, service packs, device drivers, or Ubuntu operating system components without verification they have been digitally signed using a certificate that is recognized and approved by the organization."
   block:
       - name: "MEDIUM | UBTU-20-010438 | AUDIT | The Ubuntu operating system's Advance Package Tool (APT) must be configured to prevent the installation of patches, service packs, device drivers, or Ubuntu operating system components without verification they have been digitally signed using a certificate that is recognized and approved by the organization. | Find AllowUnauthenticated true"
-        shell: "grep 'AllowUnauthenticated \"true\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
+        ansible.builtin.shell: "grep 'AllowUnauthenticated \"true\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
         changed_when: false
         failed_when: false
         register: ubtu_20_010438_apt_allowunauthenticated_status
 
       - name: "MEDIUM | UBTU-20-010438 | PATCH | The Ubuntu operating system's Advance Package Tool (APT) must be configured to prevent the installation of patches, service packs, device drivers, or Ubuntu operating system components without verification they have been digitally signed using a certificate that is recognized and approved by the organization. | Fix AllowUnauthenticated to false"
-        replace:
+        ansible.builtin.replace:
             path: "{{ item }}"
             regexp: 'AllowUnauthenticated "true"'
             replace: 'AllowUnauthenticated "false"'
@@ -2648,25 +2648,25 @@
 - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor."
   block:
       - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor. | Install apparmor"
-        package:
+        ansible.builtin.package:
             name: apparmor
             state: present
         when: "'apparmor' not in ansible_facts.packages"
 
       - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor. | Enable and start apparmor service"
-        systemd:
+        ansible.builtin.systemd:
             name: apparmor
             state: started
             enabled: true
 
       - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor. | Warning Message."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! AppArmor must have properly configured profiles for applications and home directories."
                 - "All configurations will be based on the actual system setup and organization and normally are on a per role basis."
 
       - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor. | Warn Count."
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010439'
   when:
@@ -2687,13 +2687,13 @@
 - name: "MEDIUM | UBTU-20-010440 | AUDIT | The Ubuntu operating system must allow the use of a temporary password for system logons with an immediate change to a permanent password.."
   block:
       - name: "MEDIUM | UBTU-20-010440 | AUDIT | The Ubuntu operating system must allow the use of a temporary password for system logons with an immediate change to a permanent password.. | Message out warning"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Please create a policy that ensures when a user is created, it is created using a method that forces a user to change their password upon their next login."
                 - 'For example: "chage -d 0 [UserName]" or "passwd -e [UserName]"'
 
       - name: "MEDIUM | UBTU-20-010440 | AUDIT | The Ubuntu operating system must allow the use of a temporary password for system logons with an immediate change to a permanent password. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010440'
   when:
@@ -2711,13 +2711,13 @@
 - name: "MEDIUM | UBTU-20-010443 | AUDIT | The Ubuntu operating system must only allow the use of DoD PKI-established certificate authorities for verification of the establishment of protected sessions."
   block:
       - name: "MEDIUM | UBTU-20-010443 | AUDIT | The Ubuntu operating system must only allow the use of DoD PKI-established certificate authorities for verification of the establishment of protected sessions.  | Message out warning"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! This control is a manual control."
                 - "Please use at least one DoD certificate authority to the '/usr/local/share/ca-certificates' directory in the PEM format."
 
       - name: "MEDIUM | UBTU-20-010443 | AUDIT | The Ubuntu operating system must only allow the use of DoD PKI-established certificate authorities for verification of the establishment of protected sessions. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010443'
   when:
@@ -2738,7 +2738,7 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Get encrypted partitions"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Get encrypted partitions"
-        shell: more /etc/crypttab | sed 1d
+        ansible.builtin.shell: more /etc/crypttab | sed 1d
         changed_when: false
         failed_when: false
         register: ubtu_20_010444_crypttab_status
@@ -2746,7 +2746,7 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Alert no partitions are encrypted"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operatinag system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Alert no partitions are encrypted"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! There are no encrypted partitions. Please make sure all permanent partitions are encrypted"
         when: ubtu_20_010444_crypttab_status.stdout | length == 0
@@ -2754,7 +2754,7 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Set warning count"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010444 | UBTU-20-010445'
         when: ubtu_20_010444_crypttab_status.stdout | length == 0
@@ -2762,7 +2762,7 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Alert no partitions are encrypted"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Alert no partitions are encrypted"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Please review that no permanent partitions are missing. All permanent partitions need to be encrypted"
                 - "{{ ubtu_20_010444_crypttab_status.stdout_lines }}"
@@ -2771,7 +2771,7 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Set warning count"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010444 | UBTU-20-010445'
         when: ubtu_20_010444_crypttab_status.stdout | length > 0
@@ -2795,7 +2795,7 @@
 - name: "MEDIUM | UBTU-20-010446 | PATCH | The Ubuntu operating system must configure the uncomplicated firewall to rate-limit impacted network interfaces."
   block:
       - name: "MEDIUM | UBTU-20-010446 | PATCH | The Ubuntu operating system must configure the uncomplicated firewall to rate-limit impacted network interfaces. | limit on service"
-        ufw:
+        community.general.ufw:
             rule: limit
             name: "{{ item }}"
         with_items:
@@ -2803,7 +2803,7 @@
         when: "'service' in ubtu20stig_limit_method"
 
       - name: "MEDIUM | UBTU-20-010446 | PATCH | The Ubuntu operating system must configure the uncomplicated firewall to rate-limit impacted network interfaces.| Limit on network ports"
-        ufw:
+        community.general.ufw:
             rule: limit
             interface: "{{ item }}"
             direction: in
@@ -2824,19 +2824,19 @@
 - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution."
   block:
       - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution. | Check No execution bit flag."
-        shell: dmesg | grep -i "execute disable"
+        ansible.builtin.shell: dmesg | grep -i "execute disable"
         changed_when: false
         failed_when: false
         register: ubtu_20_010447_nx_dmesg
 
       - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution. | Dmesg Does Not Contain NX (Execute Disable) protection active."
-        shell: grep flags /proc/cpuinfo | grep -w nx | sort -u
+        ansible.builtin.shell: grep flags /proc/cpuinfo | grep -w nx | sort -u
         changed_when: false
         failed_when: false
         register: ubtu_20_010447_cpuinfo_settings
 
       - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution. | Warning Out."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! The Ubuntu system you are on does not have NX enabled."
                 - "Please enter the BIOS of this system and toggle the No Execution bit to Enable it."
@@ -2844,7 +2844,7 @@
             - "'nx' not in ubtu_20_010447_cpuinfo_settings.stdout or '[    0.000000] NX (Execute Disable) protection: active' not in ubtu_20_010447_nx_dmesg.stdout"
 
       - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution. | Warning Count."
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010447'
   when:
@@ -2859,7 +2859,7 @@
       - nx
 
 - name: "MEDIUM | UBTU-20-010448 | PATCH | The Ubuntu operating system must implement address space layout randomization to protect its memory from unauthorized code execution."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/sysctl.conf
       regexp: '^#?\s*kernel.randomize_va_space'
       line: "kernel.randomize_va_space=2"
@@ -2875,23 +2875,22 @@
       - V-238369
       - kernel
 
-
 - name: "MEDIUM | UBTU-20-010449 | PATCH | The Ubuntu operating system must be configured so that Advance Package Tool (APT) removes all software components after updated versions have been installed."
   block:
       - name: "MEDIUM | UBTU-20-010449 | AUDIT | The Ubuntu operating system must be configured so that Advance Package Tool (APT) removes all software components after updated versions have been installed. | Find Remove-Unused-Kernel-Packages"
-        shell: "grep -i 'remove-unused-kernel-packages \"false\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
+        ansible.builtin.shell: "grep -i 'remove-unused-kernel-packages \"false\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
         changed_when: false
         failed_when: false
         register: ubtu_20_010449_remove_unused_kernel_packages_status
 
       - name: "MEDIUM | UBTU-20-010449 | AUDIT | The Ubuntu operating system must be configured so that Advance Package Tool (APT) removes all software components after updated versions have been installed. | Find Remove-Unused-Dependencies"
-        shell: "grep -i 'remove-unused-dependencies \"false\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
+        ansible.builtin.shell: "grep -i 'remove-unused-dependencies \"false\"' /etc/apt/apt.conf.d/* | cut -d: -f1"
         changed_when: false
         failed_when: false
         register: ubtu_20_010449_remove_unused_dependencies_status
 
       - name: "MEDIUM | UBTU-20-010449 | PATCH | The Ubuntu operating system must be configured so that Advance Package Tool (APT) removes all software components after updated versions have been installed. | Set Remove-Unused-Kernel-Packages"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: "{{ item.path }}"
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -2918,23 +2917,23 @@
 - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions."
   block:
       - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Install Package."
-        package:
+        ansible.builtin.package:
             name: aide
             state: present
         when: "'aide' not in ansible_facts.packages"
 
       - name: "MEDIUM | UBTU-20-010450 | AUDIT | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Check For Aide.db."
-        stat:
+        ansible.builtin.stat:
             path: /var/lib/aide/aide.db
         register: ubtu_20_010450_aidedb_present
 
       - name: "MEDIUM | UBTU-20-010450 | AUDIT | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Check For Aide.db.new."
-        stat:
+        ansible.builtin.stat:
             path: /var/lib/aide/aide.db.new
         register: ubtu_20_010450_aidedbnew_present
 
       - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Initialize If Not Already Running."
-        shell: aideinit
+        ansible.builtin.shell: aideinit
         become: true
         changed_when: false
         failed_when: false
@@ -2944,7 +2943,7 @@
             - not ubtu_20_010450_aidedbnew_present.stat.exists
 
       - name: "MEDIUM | UBTU-20-010450 | PATCH | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Copy New Database."
-        shell: cp -p /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+        ansible.builtin.shell: cp -p /var/lib/aide/aide.db.new /var/lib/aide/aide.db
         become: true
         changed_when: false
         failed_when: false
@@ -2953,14 +2952,14 @@
             - not ubtu_20_010450_aidedbnew_present.stat.exists
 
       - name: "MEDIUM | UBTU-20-010450 | AUDIT | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Perform New Manual Check Warning."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! AIDE package is installed and currently initialized."
                 - "Use the following command | sudo aide.wrapper --check | to perform"
                 - "a manual check and verify it conforms to site policies."
 
       - name: "MEDIUM | UBTU-20-010450 | AUDIT | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Warning Out."
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010450'
   when:
@@ -2983,7 +2982,7 @@
           "MEDIUM | UBTU-20-010456 | AUDIT | The Ubuntu operating system must have system commands set to a mode of 0755 or less permissive. | Get OS commands with mode less than 755"
           "MEDIUM | UBTU-20-010457 | AUDIT | The Ubuntu operating system must have system commands owned by root or a system account. | Get OS commands not owned by root"
           "MEDIUM | UBTU-20-010458 | PATCH | The Ubuntu operating system must have system commands group-owned by root or a system account. | Get OS commands not group-owned by root"
-        shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
+        ansible.builtin.shell: find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin \( ! -group root -o ! -user root -o -perm /022 \) -type f -exec stat -c "%n" '{}' \;
         # sudo find -L /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin ! -user root -type f -exec stat -c "%n %U" '{}' \;
         changed_when: false
         failed_when: false
@@ -2993,7 +2992,7 @@
           "MEDIUM | UBTU-20-010456 | PATCH | The Ubuntu operating system must have system commands set to a mode of 0755 or less permissive. | Set OS commands with mode 755 or more restricive"
           "MEDIUM | UBTU-20-010457 | PATCH | The Ubuntu operating system must have system commands owned by root or a system account. | Set OS commands not owned by root to owned by root"
           "MEDIUM | UBTU-20-010458 | PATCH | The Ubuntu operating system must have system commands group-owned by root or a system account. | Set OS commands not group-owned by root to root"
-        file:
+        ansible.builtin.file:
             path: "{{ item }}"
             owner: "{{ ubtu_20_010457 | ternary('root',omit) }}"
             group: "{{ ubtu_20_010458 | ternary('root',omit) }}"
@@ -3023,7 +3022,7 @@
 - name: "MEDIUM | UBTU-20-010461 | PATCH | The Ubuntu operating system must disable automatic mounting of Universal Serial Bus (USB) mass storage driver."
   block:
       - name: "MEDIUM | UBTU-20-010461 | PATCH | The Ubuntu operating system must disable automatic mounting of Universal Serial Bus (USB) mass storage driver. | Set modprobe config"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/modprobe.d/DISASTIG.conf
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -3033,7 +3032,7 @@
             - { regexp: '^blacklist usb-storage', line: 'blacklist usb-storage' }
 
       - name: "MEDIUM | UBTU-20-010461 | PATCH | The Ubuntu operating system must disable automatic mounting of Universal Serial Bus (USB) mass storage driver. | Remove USB storage module"
-        modprobe:
+        community.general.modprobe:
             name: usb-storage
             state: absent
         when: ansible_connection != 'docker'
@@ -3051,7 +3050,7 @@
 - name: "MEDIUM | UBTU-20-010455 | PATCH | The Ubuntu operating system must disable all wireless network adapters."
   block:
       - name: "MEDIUM | UBTU-20-010455 | PATCH | The Ubuntu operating system must disable all wireless network adapters. | Check if Wifi Enabled"
-        shell: nmcli radio wifi
+        ansible.builtin.shell: nmcli radio wifi
         changed_when: ubtu_20_010455_wifi_enabled.stdout != "disabled"
         failed_when: false
         check_mode: false
@@ -3059,7 +3058,7 @@
         when: "'network-manager' in ansible_facts.packages"
 
       - name: "MEDIUM | UBTU-20-010455 | PATCH | The Ubuntu operating system must disable all wireless network adapters. | Disable Wifi if Enabled"
-        shell: nmcli radio wifi off
+        ansible.builtin.shell: nmcli radio wifi off
         when:
             - ubtu_20_010455_wifi_enabled is changed
             - "'network-manager' in ansible_facts.packages"
@@ -3076,7 +3075,7 @@
       - wireless
 
 - name: "MEDIUM | UBTU-20-010045 | PATCH | The Ubuntu operating system SSH server must be configured to use only FIPS-validated key exchange algorithms."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#?\s*KexAlgorithms'
       line: 'KexAlgorithms {{ ubtu20stig_sshd.kexalgorithms }}'
