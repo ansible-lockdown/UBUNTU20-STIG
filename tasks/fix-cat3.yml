@@ -605,7 +605,7 @@
       - chrony
 
 - name: "LOW | UBTU-20-010441 | PATCH | The Ubuntu operating system must be configured such that Pluggable Authentication Module (PAM) prohibits the use of cached authentications after one day."
-  community.windows.win_lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/sssd/sssd.conf
       regexp: '^#?\s*offline_credentials_expiration ='
       line: "offline_credentials_expiration = 1"
