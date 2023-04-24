@@ -81,4 +81,3 @@ resource "local_file" "inventory" {
         skip_reboot: false
     EOF
 }
-
