@@ -257,7 +257,6 @@ ubtu20_allowed_sudoers:
 # Set this value to false and the task will just message out the list of users in the sudo group
 ubtu20_auto_remove_sudoers: false
 
-
 # Cat 2
 # UBTU-20-010000
 # ubtu20_temp_accounts is the list of temporary accounts that are known and will have a

@@ -1,7 +1,7 @@
 ---
 
 - name: "LOW | UBTU-20-010007 | PATCH | The Ubuntu operating system must enforce 24 hours/1 day as the minimum password lifetime. Passwords for new users must have a 24 hours/1 day minimum password lifetime restriction."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/login.defs
       regexp: '^#?\s*PASS_MIN_DAYS'
       line: "PASS_MIN_DAYS   {{ ubtu20stig_pass_min_days }}"
@@ -17,7 +17,7 @@
       - login
 
 - name: "LOW | UBTU-20-010008 | PATCH | The Ubuntu operating system must enforce a 60-day maximum password lifetime restriction. Passwords for new users must have a 60-day maximum password lifetime restriction."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/login.defs
       regexp: '^#?\s*PASS_MAX_DAYS'
       line: "PASS_MAX_DAYS   {{ ubtu20stig_pass_max_days }}"
@@ -33,7 +33,7 @@
       - login
 
 - name: "LOW | UBTU-20-010050 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one upper-case character be used."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*ucredit.*='
       line: ucredit = {{ ubtu20stig_pwquality_ucredit }}
@@ -49,7 +49,7 @@
       - login
 
 - name: "LOW | UBTU-20-010051 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one lower-case character be used."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*lcredit.*='
       line: lcredit = {{ ubtu20stig_pwquality_lcredit }}
@@ -65,7 +65,7 @@
       - login
 
 - name: "LOW | UBTU-20-010052 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one numeric character be used."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*dcredit.*='
       line: dcredit = {{ ubtu20stig_pwquality_dcredit }}
@@ -81,7 +81,7 @@
       - login
 
 - name: "LOW | UBTU-20-010053 | PATCH | The Ubuntu operating system must require the change of at least 8 characters when passwords are changed."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*difok.*='
       line: difok = {{ ubtu20stig_pwquality_difok }}
@@ -97,7 +97,7 @@
       - login
 
 - name: "LOW | UBTU-20-010055 | PATCH | The Ubuntu operating system must enforce password complexity by requiring that at least one special character be used."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/pwquality.conf
       regexp: '^#?\s*ocredit.*='
       line: ocredit = {{ ubtu20stig_pwquality_ocredit }}
@@ -115,13 +115,13 @@
 - name: "LOW | UBTU-20-010070 | PATCH | The Ubuntu operating system must prohibit password reuse for a minimum of five generations."
   block:
       - name: "LOW | UBTU-20-010070 | AUDIT | The Ubuntu operating system must prohibit password reuse for a minimum of five generations. | Get password remember status"
-        shell: grep '^password.*[success=2 default=ignore].*pam_unix.so' /etc/pam.d/common-password
+        ansible.builtin.shell: grep '^password.*[success=2 default=ignore].*pam_unix.so' /etc/pam.d/common-password
         changed_when: false
         failed_when: false
         register: ubtu_20_010070_remember
 
       - name: "LOW | UBTU-20-010070 | PATCH | The Ubuntu operating system must prohibit password reuse for a minimum of five generations. | Add remember if doesn't exist"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: password
             control: "{{ ubtu20stig_pamd_remember.new_control }}"
@@ -134,7 +134,7 @@
         when: ubtu_20_010070_remember.stdout | length > 0
 
       - name: "LOW | UBTU-20-010070 | PATCH | The Ubuntu operating system must prohibit password reuse for a minimum of five generations. | Add remember exists"
-        pamd:
+        community.general.pamd:
             name: common-password
             type: "{{ ubtu20stig_pamd_remember.type }}"
             control: "{{ ubtu20stig_pamd_remember.control }}"
@@ -163,19 +163,19 @@
 - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made."
   block:
       - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | pam_faillock.so authfail Current"
-        shell: grep 'auth.*[default=die].*pam_faillock.so authfail' /etc/pam.d/common-auth
+        ansible.builtin.shell: grep 'auth.*[default=die].*pam_faillock.so authfail' /etc/pam.d/common-auth
         changed_when: false
         failed_when: false
         register: ubtu_20_010072_faillock_authfail_state
 
       - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | pam_faillock.so authsucc Current"
-        shell: grep 'auth.*sufficient.*pam_faillock.so authsucc' /etc/pam.d/common-auth
+        ansible.builtin.shell: grep 'auth.*sufficient.*pam_faillock.so authsucc' /etc/pam.d/common-auth
         changed_when: false
         failed_when: false
         register: ubtu_20_010072_faillock_authsucc_state
 
       - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if no faildelay.so settings"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: auth
             control: "[default=die]"
@@ -185,7 +185,7 @@
         when: ubtu_20_010072_faillock_authfail_state.stdout | length > 0
 
       - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if faildelay.so settings exist"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: "{{ ubtu20stig_pamd_failock_authfail.type }}"
             control: "{{ ubtu20stig_pamd_failock_authfail.control }}"
@@ -198,7 +198,7 @@
         when: ubtu_20_010072_faillock_authfail_state.stdout | length == 0
 
       - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if no faildelay.so settings"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: auth
             control: sufficient
@@ -208,7 +208,7 @@
         when: ubtu_20_010072_faillock_authsucc_state.stdout | length > 0
 
       - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if faildelay.so settings exist"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: "{{ ubtu20stig_pamd_failock_authsucc.type }}"
             control: "{{ ubtu20stig_pamd_failock_authsucc.control }}"
@@ -221,7 +221,7 @@
         when: ubtu_20_010072_faillock_authsucc_state.stdout | length == 0
 
       - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Update Faillock."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/security/faillock.conf
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -246,13 +246,13 @@
 - name: "LOW | UBTU-20-010075 | PATCH | The Ubuntu operating system must enforce a delay of at least 4 seconds between logon prompts following a failed logon attempt."
   block:
       - name: "LOW | UBTU-20-010075 | AUDIT | The Ubuntu operating system must enforce a delay of at least 4 seconds between logon prompts following a failed logon attempt. | Get current faildelay.so settings"
-        shell: grep 'auth.*required.*pam_faildelay.so delay=' /etc/pam.d/common-auth
+        ansible.builtin.shell: grep 'auth.*required.*pam_faildelay.so delay=' /etc/pam.d/common-auth
         changed_when: false
         failed_when: false
         register: ubtu_20_010075_faildelay_state
 
       - name: "LOW | UBTU-20-010075 | PATCH | The Ubuntu operating system must enforce a delay of at least 4 seconds between logon prompts following a failed logon attempt. | Set if no faildelay.so settings"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: auth
             control: required
@@ -262,7 +262,7 @@
         when: ubtu_20_010075_faildelay_state.stdout | length > 0
 
       - name: "LOW | UBTU-20-010075 | PATCH | The Ubuntu operating system must enforce a delay of at least 4 seconds between logon prompts following a failed logon attempt. | Set if faildelay.so settings exist"
-        pamd:
+        community.general.pamd:
             name: common-auth
             type: "{{ ubtu20stig_pamd_faildelay.type }}"
             control: "{{ ubtu20stig_pamd_faildelay.control }}"
@@ -287,19 +287,19 @@
 - name: "LOW | UBTU-20-010215 | AUDIT | The Ubuntu operating system must allocate audit record storage capacity to store at least one weeks' worth of audit records, when audit records are not immediately sent to a central audit record storage facility."
   block:
       - name: "LOW | UBTU-20-010215 | AUDIT | The Ubuntu operating system must allocate audit record storage capacity to store at least one weeks' worth of audit records, when audit records are not immediately sent to a central audit record storage facility. | Get audit log partition"
-        shell: grep log_file /etc/audit/auditd.conf | grep -v max | awk '{print $3}' | sed 's|\(.*\)/.*|\1|'
+        ansible.builtin.shell: grep log_file /etc/audit/auditd.conf | grep -v max | awk '{print $3}' | sed 's|\(.*\)/.*|\1|'
         changed_when: false
         failed_when: false
         register: ubtu_20_010215_audit_log_path
 
       - name: "LOW | UBTU-20-010215 | AUDIT | The Ubuntu operating system must allocate audit record storage capacity to store at least one weeks' worth of audit records, when audit records are not immediately sent to a central audit record storage facility. | Get size of the audit partition"
-        shell: "df -h {{ ubtu_20_010215_audit_log_path.stdout }} | sed 1d"
+        ansible.builtin.shell: "df -h {{ ubtu_20_010215_audit_log_path.stdout }} | sed 1d"
         changed_when: false
         failed_when: false
         register: ubtu_20_010215_audit_log_partition
 
       - name: "LOW | UBTU-20-010215 | AUDIT | The Ubuntu operating system must allocate audit record storage capacity to store at least one weeks' worth of audit records, when audit records are not immediately sent to a central audit record storage facility. | Message out partition size"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below is the path and size of the partition for the audit logs."
                 - "Please make sure there is enough disk space for 1 weeks worth of logs and logs are on their own partition"
@@ -323,7 +323,7 @@
       - mounts
 
 - name: "LOW | UBTU-20-010216 | PATCH | The Ubuntu operating system audit event multiplexor must be configured to off-load audit logs onto a different system or storage media from the system being audited."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: "{{ item.path }}"
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
@@ -345,14 +345,14 @@
 - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity."
   block:
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Set action_mail_acct when set to email"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/audit/auditd.conf
             regexp: '(?i)^#?action_mail_acct ='
             line: 'action_mail_acct = {{ ubtu20stig_auditd_action_mail_acct }}'
         when: ubtu20stig_auditd_space_left_action == "email"
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Set spact_left_action and space_left"
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/audit/auditd.conf
             regexp: "{{ item.regexp }}"
             line: "{{ item.line }}"
@@ -362,7 +362,7 @@
             - { regexp: '(?i)^#?admin_space_left =', line: 'admin_space_left = {{ ubtu20stig_auditd_admin_space_left }}' }
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Get Email Address Configured."
-        shell: grep ^action_mail_acct /etc/audit/auditd.conf
+        ansible.builtin.shell: grep ^action_mail_acct /etc/audit/auditd.conf
         become: true
         failed_when: false
         changed_when: false
@@ -379,7 +379,7 @@
         when: ubtu20stig_auditd_action_mail_acct == "root"
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Warning Message Site Policies."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! If the email address of the System Administrator"
                 - "is on a remote system, a mail package must be installed and available."
@@ -390,7 +390,7 @@
             - ubtu20stig_auditd_action_mail_acct != "root"
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010217'
         when:
@@ -410,13 +410,13 @@
 - name: "LOW | UBTU-20-010230 | PATCH | The Ubuntu operating system must record time stamps for audit records that can be mapped to Coordinated Universal Time (UTC) or Greenwich Mean Time (GMT)."
   block:
       - name: "LOW | UBTU-20-010230 | PATCH | The Ubuntu operating system must record time stamps for audit records that can be mapped to Coordinated Universal Time (UTC) or Greenwich Mean Time (GMT). | Get timezone status"
-        shell: timedatectl status | grep -i "time zone"
+        ansible.builtin.shell: timedatectl status | grep -i "time zone"
         changed_when: false
         failed_when: false
         register: ubtu_20_010230_current_timezone
 
       - name: "LOW | UBTU-20-010230 | PATCH | The Ubuntu operating system must record time stamps for audit records that can be mapped to Coordinated Universal Time (UTC) or Greenwich Mean Time (GMT). | Set timezone"
-        shell: timedatectl set-timezone {{ ubtu20stig_timezone }}
+        ansible.builtin.shell: timedatectl set-timezone {{ ubtu20stig_timezone }}
         changed_when: true
         when: ubtu20stig_timezone not in ubtu_20_010230_current_timezone.stdout
   when:
@@ -433,14 +433,14 @@
 - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems."
   block:
       - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems. | Get Weekly Crontab Folder."
-        shell: ls /etc/cron.weekly
+        ansible.builtin.shell: ls /etc/cron.weekly
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010300_cron_weekly
 
       - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems. | Warning Message."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Please verify there is a weekly cron job script to offload audit data."
                 - "The STIG states audit-offload should be listed and have a proper script moving to a external media device."
@@ -448,7 +448,7 @@
                 - "{{ ubtu_20_010300_cron_weekly.stdout_lines }}"
 
       - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems. | Warn Count."
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010300'
   when:
@@ -464,7 +464,7 @@
 
 # Control asks for this value to be at the top of the file, but it should go at the end.
 - name: "LOW | UBTU-20-010400 | PATCH | The Ubuntu operating system must limit the number of concurrent sessions to ten for all accounts and/or account types."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/security/limits.conf
       regexp: '^\*               hard    maxlogins'
       line: '*               hard    maxlogins       {{ ubtu20stig_maxlogins }}'
@@ -487,7 +487,7 @@
 - name: "LOW | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours."
   block:
       - name: "MEDIUM | UBTU-20-010410 | PATCH | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Set Accounts To 72 Hour Terminate."
-        shell: chage -E $(date -d "+3 days" +%F) {{ item }}
+        ansible.builtin.shell: chage -E $(date -d "+3 days" +%F) {{ item }}
         become: true
         changed_when: false
         failed_when: false
@@ -496,7 +496,7 @@
         when: ubtu20_emergency_account != "none"
 
       - name: "LOW | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Warning For Bad Account."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! The account you are trying to set a expiration on is not a valid account on this system."
                 - "Please verify the account using the list below."
@@ -505,7 +505,7 @@
             - ubtu20_emergency_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Message out warning"
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Below are the system accounts. If any where emergency accounts please make"
                 - "sure they are removed or disabled after the crisis is resolved or within 72 hours"
@@ -519,7 +519,7 @@
             - ubtu20_emergency_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010410'
         when:
@@ -541,26 +541,26 @@
 - name: "MEDIUM | UUBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP)."
   block:
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Check For Install."
-        shell: dpkg -l | grep -i mcafeetp
+        ansible.builtin.shell: dpkg -l | grep -i mcafeetp
         changed_when: false
         failed_when: false
         register: ubtu_20_mcafeetp
 
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Check that the daemon is running."
-        shell: /opt/McAfee/ens/tp/init/mfetpd-control.sh status
+        ansible.builtin.shell: /opt/McAfee/ens/tp/init/mfetpd-control.sh status
         changed_when: false
         failed_when: false
         register: ubtu_20_mcafeetp_daemon_status
 
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Not Installed Warning Message."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Mcafee Endpoint Security for Linux Threat Prevention is not installed on the system."
                 - "Please install from your vendor portal and install on the system."
         when: ubtu_20_mcafeetp.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Installed But Not Running Message."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! Mcafee Endpoint Security for Linux Threat Prevention is installed on the system."
                 - "However the daemon is not currently running please start the daemon."
@@ -569,7 +569,7 @@
             - ubtu_20_mcafeetp_daemon_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Set warning count."
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010415'
         when:
@@ -588,7 +588,7 @@
       - ensltp
 
 - name: "LOW | UBTU-20-010436 | PATCH |  The Ubuntu operating system must synchronize internal information system clocks to the authoritative time source when the time difference is greater than one second."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/chrony/chrony.conf
       regexp: '^#?\s*makestep'
       line: makestep {{ ubtu20stig_chrony.makestep }}
@@ -605,7 +605,7 @@
       - chrony
 
 - name: "LOW | UBTU-20-010441 | PATCH | The Ubuntu operating system must be configured such that Pluggable Authentication Module (PAM) prohibits the use of cached authentications after one day."
-  lineinfile:
+  ansible.builtin.lineinfile:
       path: /etc/sssd/sssd.conf
       regexp: '^#?\s*offline_credentials_expiration ='
       line: "offline_credentials_expiration = 1"
@@ -625,13 +625,13 @@
 - name: "LOW | UBTU-20-010453 | PATCH | The Ubuntu operating system must display the date and time of the last successful account logon upon logon."
   block:
       - name: "LOW | UBTU-20-010453 | AUDIT | The Ubuntu operating system must display the date and time of the last successful account logon upon logon. | Get pam_lastlog.so showfailed status"
-        shell: grep 'session.*required.*pam_lastlog.so' /etc/pam.d/login
+        ansible.builtin.shell: grep 'session.*required.*pam_lastlog.so' /etc/pam.d/login
         changed_when: false
         failed_when: false
         register: ubtu_20_010453_showfailed_state
 
       - name: "LOW | UBTU-20-010453 | PATCH | The Ubuntu operating system must display the date and time of the last successful account logon upon logon. | Set if noshowfail exists"
-        pamd:
+        community.general.pamd:
             name: login
             type: session
             control: required
@@ -641,7 +641,7 @@
         when: ubtu_20_010453_showfailed_state.stdout | length > 0
 
       - name: "LOW | UBTU-20-010453 | PATCH | The Ubuntu operating system must display the date and time of the last successful account logon upon logon. | Set if no noshowfail"
-        pamd:
+        community.general.pamd:
             name: login
             type: "{{ ubtu20stig_pamd_showfailed.type }}"
             control: "{{ ubtu20stig_pamd_showfailed.control }}"
@@ -666,14 +666,14 @@
 - name: "LOW | UBTU-20-010401 | AUDIT | The Ubuntu operating system must restrict access to the kernel message buffer."
   block:
       - name: "LOW | UBTU-20-010401 | AUDIT | The Ubuntu operating system must restrict access to the kernel message buffer. | Find current status."
-        shell: sysctl kernel.dmesg_restrict
+        ansible.builtin.shell: sysctl kernel.dmesg_restrict
         become: true
         changed_when: false
         failed_when: false
         register: ubtu_20_010401_conflicting_settings
 
       - name: "LOW | UBTU-20-010401 | AUDIT | The Ubuntu operating system must restrict access to the kernel message buffer. | Set restrict to 1."
-        lineinfile:
+        ansible.builtin.lineinfile:
             path: /etc/sysctl.d/10-kernel-hardening.conf
             regexp: '(?i)^#?kernel.dmesg_restrict'
             line: 'kernel.dmesg_restrict = 1'
