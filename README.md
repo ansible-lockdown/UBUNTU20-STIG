@@ -7,27 +7,27 @@
 ---
 
 ![Org Stars](https://img.shields.io/github/stars/ansible-lockdown?label=Org%20Stars&style=social)
-![Stars](https://img.shields.io/github/stars/ansible-lockdown/UBUNTU20-STIG?label=Repo%20Stars&style=social)
-![Forks](https://img.shields.io/github/forks/ansible-lockdown/UBUNTU20-STIG?style=social)
+![Stars](https://img.shields.io/github/stars/ansible-lockdown/ubuntu20-stig?label=Repo%20Stars&style=social)
+![Forks](https://img.shields.io/github/forks/ansible-lockdown/ubuntu20-stig?style=social)
 ![followers](https://img.shields.io/github/followers/ansible-lockdown?style=social)
 [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/AnsibleLockdown.svg?style=social&label=Follow%20%40AnsibleLockdown)](https://twitter.com/AnsibleLockdown)
 
 ![Ansible Galaxy Quality](https://img.shields.io/ansible/quality/61237?label=Quality&&logo=ansible)
 ![Discord Badge](https://img.shields.io/discord/925818806838919229?logo=discord)
 
-![Devel Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/Windows-2019-STIG/windows_benchmark_testing.yml?label=Devel%20Build%20Status)
-![Devel Commits](https://img.shields.io/github/commit-activity/m/ansible-lockdown/Windows-2019-STIG/devel?color=dark%20green&label=Devel%20Branch%20commits)
+![Devel Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/ubuntu20-stig/linux_benchmark_testing.yml?label=Devel%20Build%20Status)
+![Devel Commits](https://img.shields.io/github/commit-activity/m/ansible-lockdown/ubuntu20-stig/devel?color=dark%20green&label=Devel%20Branch%20Commits)
 
-![Release Branch](https://img.shields.io/badge/Release%20Branch-Main-brightgreen) 
-![Main Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/UBUNTU20-STIG/linux_benchmark_testing.yml?label=Build%20Status)
-![Main Release Date](https://img.shields.io/github/release-date/ansible-lockdown/UBUNTU20-STIG?label=Release%20Date)
-![Release Tag](https://img.shields.io/github/v/tag/ansible-lockdown/UBUNTU20-STIG?label=Release%20Tag&&color=success)
+![Release Branch](https://img.shields.io/badge/Release%20Branch-Main-brightgreen)
+![Main Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/ubuntu20-stig/linux_benchmark_testing.yml?label=Build%20Status)
+![Main Release Date](https://img.shields.io/github/release-date/ansible-lockdown/ubuntu20-stig?label=Release%20Date)
+![Release Tag](https://img.shields.io/github/v/tag/ansible-lockdown/ubuntu20-stig?label=Release%20Tag&&color=success)
 
-![Issues Open](https://img.shields.io/github/issues-raw/ansible-lockdown/UBUNTU20-STIG?label=Open%20Issues)
-![Issues Closed](https://img.shields.io/github/issues-closed-raw/ansible-lockdown/UBUNTU20-STIG?label=Closed%20Issues&&color=success)
-![Pull Requests](https://img.shields.io/github/issues-pr/ansible-lockdown/UBUNTU20-STIG?label=Pull%20Requests)
+![Issues Open](https://img.shields.io/github/issues-raw/ansible-lockdown/ubuntu20-stig?label=Open%20Issues)
+![Issues Closed](https://img.shields.io/github/issues-closed-raw/ansible-lockdown/ubuntu20-stig?label=Closed%20Issues&&color=success)
+![Pull Requests](https://img.shields.io/github/issues-pr/ansible-lockdown/ubuntu20-stig?label=Pull%20Requests)
 
-![License](https://img.shields.io/github/license/ansible-lockdown/UBUNTU20-STIG?label=License)
+![License](https://img.shields.io/github/license/ansible-lockdown/ubuntu20-stig?label=License)
 
 ---
 
@@ -39,7 +39,7 @@
 
 ### Community
 
-Join us on our [Discord Server](https://discord.io/ansible-lockdown) to ask questions, discuss features, or just chat with other Ansible-Lockdown users.
+Join us on our [Discord Server](https://www.lockdownenterprise.com/discord) to ask questions, discuss features, or just chat with other Ansible-Lockdown users.
 
 ---
 
@@ -64,7 +64,7 @@ This is managed using tags:
 - CAT2
 - CAT3
 
-The control found in defaults main also need to reflect true so as this will allow the controls to run when the playbook is launched. 
+The control found in defaults main also need to reflect true so as this will allow the controls to run when the playbook is launched.
 
 ## Coming from a previous release
 
@@ -75,7 +75,7 @@ Further details can be seen in the [Changelog](./ChangeLog.md)
 
 ## Auditing (new)
 
-Currently this release does not have a auditing tool. 
+Currently this release does not have a auditing tool.
 
 ## Documentation
 
