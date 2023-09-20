@@ -35,7 +35,8 @@
             - ubtu20_temp_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010000 | AUDIT | The Ubuntu operating system must provision temporary user accounts with an expiration time of 72 hours or less. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010000'
         when:
@@ -150,7 +151,8 @@
         when: ubtu_20_010010_duplicate_uid_users.stdout | length > 0
 
       - name: "MEDIUM | UBTU-20-010010 | AUDIT | The Ubuntu operating system must uniquely identify interactive users. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010010'
         when: ubtu_20_010010_duplicate_uid_users.stdout | length > 0
@@ -727,7 +729,8 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              ansible.builtin.import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks:
+                  file: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -771,7 +774,8 @@
                   - ubtu20stig_aide_sha1_current_monthly.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              ansible.builtin.import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks:
+                  file: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -813,7 +817,8 @@
                   - ubtu20stig_aide_sha1_current_daily.stdout | length > 0
 
             - name: "MEDIUM | UBTU-20-010074 | AUDIT | The Ubuntu operating system must be configured so that the script which runs each 30 days or less to check file integrity is the default one. | Warn Count."
-              ansible.builtin.import_tasks: warning_facts.yml
+              ansible.builtin.import_tasks:
+                  file: warning_facts.yml
               vars:
                   warn_control_id: 'UBTU-20-010074'
               when:
@@ -2020,7 +2025,8 @@
             msg: "Warning!! Please make sure your UFW allow/deny settings conform to PPSM CAL vulnerability assessments"
 
       - name: The Ubuntu operating system must be configured to prohibit or restrict the use of functions, ports, protocols, and/or services, as defined in the PPSM CAL and vulnerability assessments. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010407'
   when:
@@ -2165,7 +2171,8 @@
         when: ubtu_20_010414_crypttab_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010414'
         when: ubtu_20_010414_crypttab_status.stdout | length == 0
@@ -2178,7 +2185,8 @@
         when: ubtu_20_010414_crypttab_status.stdout | length > 0
 
       - name: "MEDIUM | UBTU-20-010414 | AUDIT | Ubuntu operating systems handling data requiring data at rest protections must employ cryptographic mechanisms to prevent unauthorized disclosure and modification of the information at rest. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010414'
         when: ubtu_20_010414_crypttab_status.stdout | length > 0
@@ -2666,7 +2674,8 @@
                 - "All configurations will be based on the actual system setup and organization and normally are on a per role basis."
 
       - name: "MEDIUM | UBTU-20-010439 | PATCH | The Ubuntu operating system must be configured to use AppArmor. | Warn Count."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010439'
   when:
@@ -2693,7 +2702,8 @@
                 - 'For example: "chage -d 0 [UserName]" or "passwd -e [UserName]"'
 
       - name: "MEDIUM | UBTU-20-010440 | AUDIT | The Ubuntu operating system must allow the use of a temporary password for system logons with an immediate change to a permanent password. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010440'
   when:
@@ -2717,7 +2727,8 @@
                 - "Please use at least one DoD certificate authority to the '/usr/local/share/ca-certificates' directory in the PEM format."
 
       - name: "MEDIUM | UBTU-20-010443 | AUDIT | The Ubuntu operating system must only allow the use of DoD PKI-established certificate authorities for verification of the establishment of protected sessions. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010443'
   when:
@@ -2754,7 +2765,8 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Set warning count"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010444 | UBTU-20-010445'
         when: ubtu_20_010444_crypttab_status.stdout | length == 0
@@ -2771,7 +2783,8 @@
       - name: |
               "MEDIUM | UBTU-20-010444 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized modification of all information at rest. | Set warning count"
               "MEDIUM | UBTU-20-010445 | AUDIT | Ubuntu operating system must implement cryptographic mechanisms to prevent unauthorized disclosure of all information at rest. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010444 | UBTU-20-010445'
         when: ubtu_20_010444_crypttab_status.stdout | length > 0
@@ -2844,7 +2857,8 @@
             - "'nx' not in ubtu_20_010447_cpuinfo_settings.stdout or '[    0.000000] NX (Execute Disable) protection: active' not in ubtu_20_010447_nx_dmesg.stdout"
 
       - name: "MEDIUM | UBTU-20-010447 | AUDIT | The Ubuntu operating system must implement nonexecutable data to protect its memory from unauthorized code execution. | Warning Count."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010447'
   when:
@@ -2959,7 +2973,8 @@
                 - "a manual check and verify it conforms to site policies."
 
       - name: "MEDIUM | UBTU-20-010450 | AUDIT | The Ubuntu operating system must use a file integrity tool to verify correct operation of all security functions. | Warning Out."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010450'
   when:
