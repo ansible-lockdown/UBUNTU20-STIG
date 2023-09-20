@@ -307,7 +307,8 @@
                 - "Disk Space: {{ ubtu_20_010215_audit_log_partition.stdout }}"
 
       - name: "LOW | UBTU-20-010215 | AUDIT | The Ubuntu operating system must allocate audit record storage capacity to store at least one weeks' worth of audit records, when audit records are not immediately sent to a central audit record storage facility. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010215'
   when:
@@ -390,7 +391,8 @@
             - ubtu20stig_auditd_action_mail_acct != "root"
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010217'
         when:
@@ -448,7 +450,8 @@
                 - "{{ ubtu_20_010300_cron_weekly.stdout_lines }}"
 
       - name: "LOW | UBTU-20-010300 | AUDIT | The Ubuntu operating system must have a crontab script running weekly to offload audit events of standalone systems. | Warn Count."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010300'
   when:
@@ -519,7 +522,8 @@
             - ubtu20_emergency_account not in ubtu20stig_passwd | map(attribute='id') | list
 
       - name: "MEDIUM | UBTU-20-010410 | AUDIT | The Ubuntu operating system must automatically remove or disable emergency accounts after 72 hours. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010410'
         when:
@@ -569,7 +573,8 @@
             - ubtu_20_mcafeetp_daemon_status.stdout | length == 0
 
       - name: "MEDIUM | UBTU-20-010415 | AUDIT | The Ubuntu operating system must deploy Endpoint Security for Linux Threat Prevention (ENSLTP). | Set warning count."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010415'
         when:

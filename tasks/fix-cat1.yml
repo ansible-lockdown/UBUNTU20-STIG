@@ -78,7 +78,8 @@
             - "'password' in ubtu_20_010009_bootloader_hash_check.stdout"
 
       - name: "HIGH | UBTU-20-010009 | AUDIT | The Ubuntu operating system must map the authenticated identity to the user or group account for PKI-based authentication. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010009'
   when:
@@ -125,7 +126,8 @@
         when: not ubtu20_auto_remove_sudoers
 
       - name: "HIGH | UBTU-20-010012 | AUDIT | The Ubuntu operating system must ensure only users who need access to security functions are part of sudo group. | Set Warn Count."
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010012'
         when: not ubtu20_auto_remove_sudoers
@@ -244,7 +246,8 @@
                 - "A subscription to the Ubuntu Pro plan is required to obtain the FIPS Kernel cryptographic modules and enable FIPS"
 
       - name: "HIGH | UBTU-20-010442 | AUDIT | The Ubuntu operating system must implement NIST FIPS-validated cryptography to protect classified information and for the following: To provision digital signatures, to generate cryptographic hashes, and to protect unclassified information requiring confidentiality and cryptographic protection in accordance with applicable federal laws, Executive Orders, directives, policies, regulations, and standards. | Set warning count"
-        ansible.builtin.import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-20-010442'
   when:
@@ -319,7 +322,8 @@
             - not ubtu20stig_disruption_high
 
       - name: "HIGH | UBTU-20-010462 | PATCH | The Ubuntu operating system must not have accounts configured with blank or null passwords. | Set warning count"
-        import_tasks: warning_facts.yml
+        ansible.builtin.import_tasks:
+            file: warning_facts.yml
         vars:
             warn_control_id: 'UBTU-18-010522'
         when:

@@ -9,7 +9,7 @@ pam_pkcs11 {
   nullok = true;
 
   # Enable debugging support.
-  debug = true; 
+  debug = true;
 
   # Do not prompt the user for the passwords but take them from the
   # PAM_ items instead.
@@ -62,7 +62,7 @@ pam_pkcs11 {
     # constant slot numbering.
     #
     #  slot_description = "xxxx"
-    #      The slot is specified by the slot description, for example, 
+    #      The slot is specified by the slot description, for example,
     #      slot_description = "Sun Crypto Softtoken".  The default value is
     #      "none" which means to use the first slot with an available token.
     #
@@ -76,29 +76,29 @@ pam_pkcs11 {
     # Where are CA certificates stored?
     # You can setup this value to:
     # 1- A directory with openssl hash-links to all certificates
-    # 2- A CA file in PEM (.pem) or ASN1 (.cer) format, 
+    # 2- A CA file in PEM (.pem) or ASN1 (.cer) format,
     # containing all allowed CA certs
     # The default value is /etc/pam_pkcs11/cacerts.
     ca_dir = /etc/pam_pkcs11/cacerts;
-  
+
     # Path to the directory where the local (offline) CRLs are stored.
     # Same convention as above is applied: you can choose either
     # hash-link directory or CRL file
     # The default value is /etc/pam_pkcs11/crls.
     crl_dir = /etc/pam_pkcs11/crls;
-  
-    # Some pcks#11 libraries can handle multithreading. So 
-    # set it to true to properly call C_Initialize() 
+
+    # Some pcks#11 libraries can handle multithreading. So
+    # set it to true to properly call C_Initialize()
     support_threads = false;
 
-    # Sets the Certificate verification policy. 
+    # Sets the Certificate verification policy.
     # "none"        Performs no verification
     # "ca"          Does CA check
     # "crl_online"  Downloads the CRL form the location given by the
     #               CRL distribution point extension of the certificate
     # "crl_offline" Uses the locally stored CRLs
-    # "crl_auto"    Is a combination of online and offline; it first 
-    #               tries to download the CRL from a possibly given CRL 
+    # "crl_auto"    Is a combination of online and offline; it first
+    #               tries to download the CRL from a possibly given CRL
     #               distribution point and if this fails, uses the local
     #               CRLs
     # "signature"   Does also a signature check to ensure that private
@@ -167,10 +167,10 @@ pam_pkcs11 {
   # When no absolute path or module info is provided, use this
   # value as module search path
   # TODO:
-  # This is not still functional: use absolute pathnames or LD_LIBRARY_PATH 
+  # This is not still functional: use absolute pathnames or LD_LIBRARY_PATH
   mapper_search_path = @libdir@/pam_pkcs11;
 
-  # 
+  #
   # Generic certificate contents mapper
   mapper generic {
         debug = true;
@@ -289,7 +289,7 @@ pam_pkcs11 {
 	module = internal;
 	# module = @libdir@/pam_pkcs11/mail_mapper.so;
 	# Declare mapfile or
-	# leave empty "" or "none" to use no map 
+	# leave empty "" or "none" to use no map
 	mapfile = file:///etc/pam_pkcs11/mail_mapping;
 	# Some certs store email in uppercase. take care on this
 	ignorecase = true;
