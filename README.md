@@ -14,20 +14,20 @@
 
 ![Ansible Galaxy Quality](https://img.shields.io/ansible/quality/61237?label=Quality&&logo=ansible)
 ![Discord Badge](https://img.shields.io/discord/925818806838919229?logo=discord)
-
-![Devel Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/ubuntu20-stig/linux_benchmark_testing.yml?label=Devel%20Build%20Status)
-![Devel Commits](https://img.shields.io/github/commit-activity/m/ansible-lockdown/ubuntu20-stig/devel?color=dark%20green&label=Devel%20Branch%20Commits)
-
 ![Release Branch](https://img.shields.io/badge/Release%20Branch-Main-brightgreen)
-![Main Build Status](https://img.shields.io/github/actions/workflow/status/ansible-lockdown/ubuntu20-stig/linux_benchmark_testing.yml?label=Build%20Status)
-![Main Release Date](https://img.shields.io/github/release-date/ansible-lockdown/ubuntu20-stig?label=Release%20Date)
-![Release Tag](https://img.shields.io/github/v/tag/ansible-lockdown/ubuntu20-stig?label=Release%20Tag&&color=success)
+![Release Tag](https://img.shields.io/github/v/release/ansible-lockdown/UBUNTU20-STIG)
+![Release Date](https://img.shields.io/github/release-date/ansible-lockdown/UBUNTU20-STIG)
 
-![Issues Open](https://img.shields.io/github/issues-raw/ansible-lockdown/ubuntu20-stig?label=Open%20Issues)
-![Issues Closed](https://img.shields.io/github/issues-closed-raw/ansible-lockdown/ubuntu20-stig?label=Closed%20Issues&&color=success)
-![Pull Requests](https://img.shields.io/github/issues-pr/ansible-lockdown/ubuntu20-stig?label=Pull%20Requests)
+[![Main Pipeline Status](https://github.com/ansible-lockdown/UBUNTU20-STIG/actions/workflows/main_pipeline_validation.yml/badge.svg?)](https://github.com/ansible-lockdown/UBUNTU20-STIG/actions/workflows/main_pipeline_validation.yml)
 
-![License](https://img.shields.io/github/license/ansible-lockdown/ubuntu20-stig?label=License)
+[![Devel Pipeline Status](https://github.com/ansible-lockdown/UBUNTU20-STIG/actions/workflows/devel_pipeline_validation.yml/badge.svg?)](https://github.com/ansible-lockdown/UBUNTU20-STIG/actions/workflows/devel_pipeline_validation.yml)
+![Devel Commits](https://img.shields.io/github/commit-activity/m/ansible-lockdown/UBUNTU20-STIG/devel?color=dark%20green&label=Devel%20Branch%20Commits)
+
+![Issues Open](https://img.shields.io/github/issues-raw/ansible-lockdown/UBUNTU20-STIG?label=Open%20Issues)
+![Issues Closed](https://img.shields.io/github/issues-closed-raw/ansible-lockdown/UBUNTU20-STIG?label=Closed%20Issues&&color=success)
+![Pull Requests](https://img.shields.io/github/issues-pr/ansible-lockdown/UBUNTU20-STIG?label=Pull%20Requests)
+
+![License](https://img.shields.io/github/license/ansible-lockdown/UBUNTU20-STIG?label=License)
 
 ---
 
