@@ -113,13 +113,13 @@
 -a always,exit -F arch=b64 -S finit_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
 {% endif %}
 {% if ubtu_20_010181 %}
--a always,exit -F arch=b32 -S delete_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng 
+-a always,exit -F arch=b32 -S delete_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
 -a always,exit -F arch=b64 -S delete_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
 {% endif %}
 {% if ubtu_20_010211 %}
--a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -F key=execpriv 
--a always,exit -F arch=b64 -S execve -C gid!=egid -F egid=0 -F key=execpriv 
--a always,exit -F arch=b32 -S execve -C uid!=euid -F euid=0 -F key=execpriv 
+-a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -F key=execpriv
+-a always,exit -F arch=b64 -S execve -C gid!=egid -F egid=0 -F key=execpriv
+-a always,exit -F arch=b32 -S execve -C uid!=euid -F euid=0 -F key=execpriv
 -a always,exit -F arch=b32 -S execve -C gid!=egid -F egid=0 -F key=execpriv
 {% endif %}
 {% if ubtu_20_010244 %}
@@ -146,4 +146,4 @@
 {% endif %}
 {% if ubtu_20_010298 %}
 -w /bin/fdisk -p x -k fdisk
-{% endif %} 
+{% endif %}
