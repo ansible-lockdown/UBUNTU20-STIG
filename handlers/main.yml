@@ -56,7 +56,7 @@
   ansible.builtin.shell: augenrules --load
 
 - name: restart auditd
-  service:
+  ansible.builtin.service:
       name: auditd
       state: restarted
 
