@@ -373,7 +373,7 @@
             - ubtu20stig_auditd_action_mail_acct != "root"
 
       - name: "LOW | UBTU-20-010217 | PATCH | The Ubuntu operating system must immediately notify the SA and ISSO (at a minimum) when allocated audit record storage volume reaches 75% of the repository maximum audit record storage capacity. | Warning Message No Email Set."
-        debug:
+        ansible.builtin.debug:
             msg:
                 - "Warning!! You have not set the email address of the SA(s) and/or ISSO"
                 - "Please set variable ubtu20stig_auditd_action_mail_acct in defaults/main to correct email addres."
