@@ -14,6 +14,7 @@
 
 ![Ansible Galaxy Quality](https://img.shields.io/ansible/quality/61237?label=Quality&&logo=ansible)
 ![Discord Badge](https://img.shields.io/discord/925818806838919229?logo=discord)
+
 ![Release Branch](https://img.shields.io/badge/Release%20Branch-Main-brightgreen)
 ![Release Tag](https://img.shields.io/github/v/release/ansible-lockdown/UBUNTU20-STIG)
 ![Release Date](https://img.shields.io/github/release-date/ansible-lockdown/UBUNTU20-STIG)

@@ -109,8 +109,8 @@
 -a always,exit -F path=/usr/sbin/pam_timestamp_check -F perm=x -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k privileged-pam_timestamp_check
 {% endif %}
 {% if ubtu_20_010179 %}
--a always,exit -F arch=b32 -S finit_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
--a always,exit -F arch=b64 -S finit_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
+-a always,exit -F arch=b32 -S init_module,finit_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
+-a always,exit -F arch=b64 -S init_module,finit_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
 {% endif %}
 {% if ubtu_20_010181 %}
 -a always,exit -F arch=b32 -S delete_module -F auid>={{ ubtu20stig_int_gid }} -F auid!=4294967295 -k module_chng
@@ -145,5 +145,5 @@
 -w /bin/kmod -p x -k modules
 {% endif %}
 {% if ubtu_20_010298 %}
--w /bin/fdisk -p x -k fdisk
+-w /sbin/fdisk -p x -k fdisk
 {% endif %}
