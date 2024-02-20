@@ -191,7 +191,7 @@
 - name: "HIGH | UBTU-20-010048 | PATCH | The Ubuntu operating system must be configured so that remote X connections are disabled, unless to fulfill documented and validated mission requirements."
   ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^#?(\s+|)X11Forwarding'
+      regexp: '^#?X11Forwarding'
       line: "X11Forwarding no"
   notify: restart sshd
   when:
