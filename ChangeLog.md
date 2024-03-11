@@ -1,5 +1,11 @@
 # Changelog
 
+## Based on Stig v1r7 - Jan 2023
+
+- ansible version updated to 2.10.1 minimum
+- updates to pre-commit config
+- gitignore updated
+
 ## Release 0.9.1
 
 - yamllint update
@@ -15,7 +21,7 @@ Issues
 - thanks to @kfiresmith
   - #11
   - #12
-- thanks to €aelx-rowe
+- thanks to @alex-rowe
   - #13
 
 ## Release 0.9.0
