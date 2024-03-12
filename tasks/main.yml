@@ -1,10 +1,17 @@
 ---
 
-- name: Gather distribution info
-  ansible.builtin.setup:
-      gather_subset: distribution,!all,!min
-  when:
-      - ansible_distribution is not defined
+- name: Check OS version and family
+  ansible.builtin.assert:
+      that: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version_compare('20', '==')
+      msg: "This role can only be run against Ubuntu 20. {{ ansible_distribution }} {{ ansible_distribution_major_version }} is not supported."
+  tags:
+      - always
+
+- name: Check ansible version
+  ansible.builtin.assert:
+      that: ansible_version.full is version_compare(min_ansible_version, '>=')
+      fail_msg: "You must use Ansible {{ min_ansible_version }} or greater"
+      success_msg: "This role is running a supported version of ansible {{ ansible_version.full }} >= {{ min_ansible_version }}"
   tags:
       - always
 

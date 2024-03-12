@@ -3,8 +3,6 @@
 *.retry
 .cache
 .vagrant
-vagrantfile
-Vagrantfile
 tests/*redhat-subscription
 tests/Dockerfile
 *.iso
@@ -12,6 +10,9 @@ tests/Dockerfile
 packer_cache
 delete*
 ignore*
+test_inv
+# temp remove doc while this is built up
+doc/
 # VSCode
 .vscode
 
@@ -45,4 +46,3 @@ benchparse/
 
 # GitHub Action/Workflow files
 .github/
-.DS_Store
