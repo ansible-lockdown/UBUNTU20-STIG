@@ -1,6 +1,7 @@
 ---
 
-- hosts: all  # noqa: name[play]
+- name: Run Ubuntu20-stig remediation role
+  hosts: all
   become: true
 
   roles:
