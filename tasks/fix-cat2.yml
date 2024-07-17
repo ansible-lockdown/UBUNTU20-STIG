@@ -210,7 +210,7 @@
       - name: "MEDIUM | UBTU-20-010014 | PATCH | The Ubuntu operating system must require users to reauthenticate for privilege escalation or when changing roles. | Replace NOPASSWD Finds."
         ansible.builtin.replace:
             path: "{{ item }}"
-            regexp: '^([^#|{% if system_is_ec2 %}ec2-user{% endif %}].*)NOPASSWD(.*)'
+            regexp: '^((?!#|{% for name in ubtu20stig_sudoers_exclude_nopasswd_list %}{{ name }}{% if not loop.last -%}|{%- endif -%}{% endfor %}).*)NOPASSWD(.*)'
             replace: '\1PASSWD\2'
         with_items:
             - "{{ ubtu_20_010014_sudoers_nopasswd_status.stdout_lines }}"
