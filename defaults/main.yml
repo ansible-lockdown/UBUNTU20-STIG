@@ -300,6 +300,13 @@ ubtu20stig_warning_banner: |
 # To conform to STIG standards the value needs to be 600 or less
 ubtu20stig_user_session_timeout: 600
 
+# UBTU-20-010014
+# ubtu20stig_sudoers_exclude_nopasswd_list allows you to set users
+# that will not have NOPASSWD removed from sudoers config
+
+ubtu20stig_sudoers_exclude_nopasswd_list:
+    - ec2-user
+
 # UBTU-20-010033
 # ubtu20stig_pkcs11 are the settings related to the pkcs11 pam module
 # The settings type, control, module_path, and state need to correspond to an existing rule in /etc/pam.d/common-password, which is used
