@@ -1,0 +1,11 @@
+{#
+This is a pam-auth-update profile that will install a pam_faillock.so authsucc
+line into /etc/pam.d/common-auth.
+#}
+Name: Faillock Authsucc
+Default: no
+Priority: 128
+
+Auth-Type: Additional
+Auth:
+        sufficient pam_faillock.so authsucc

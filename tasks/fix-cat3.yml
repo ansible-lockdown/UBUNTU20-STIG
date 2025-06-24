@@ -162,78 +162,40 @@
 
 - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made."
   block:
-      - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | pam_faillock.so authfail Current"
-        ansible.builtin.shell: grep 'auth.*[default=die].*pam_faillock.so authfail' /etc/pam.d/common-auth
-        changed_when: false
-        failed_when: false
-        register: ubtu_20_010072_faillock_authfail_state
+      - name: "LOW | UBTU-20-010072 | Install pam-config profiles using a loop"
+        ansible.builtin.template:
+            src: "pam-configs/pam-configs-profile-{{ item }}.j2"
+            dest: "/usr/share/pam-configs/{{ item }}"
+            owner: root
+            group: root
+            mode: '0644'
+        loop:
+            - faillockmain
+            - faillockpost
+            - faillockpre
 
-      - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | pam_faillock.so authsucc Current"
-        ansible.builtin.shell: grep 'auth.*sufficient.*pam_faillock.so authsucc' /etc/pam.d/common-auth
-        changed_when: false
-        failed_when: false
-        register: ubtu_20_010072_faillock_authsucc_state
+      - name: "LOW | UBTU-20-010072 | Read the contents of /etc/pam.d/common-auth"
+        ansible.builtin.slurp:
+            path: /etc/pam.d/common-auth
+        register: common_auth_file
 
-      - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if no faildelay.so settings"
-        community.general.pamd:
-            name: common-auth
-            type: auth
-            control: "[default=die]"
-            module_path: pam_faillock.so
-            module_arguments: "{{ ubtu20stig_pamd_failock_authfail.auth }}"
-            state: updated
-        when: ubtu_20_010072_faillock_authfail_state.stdout | length > 0
+      - name: "LOW | UBTU-20-010072 | Run pam-auth-config enable for faillockpre only if 'required pam_faillock.so preauth' is not present"
+        ansible.builtin.command:
+            cmd: /usr/sbin/pam-auth-update --package --enable faillockpre --force
+        when: "'required pam_faillock.so preauth' not in common_auth_file.content | b64decode"
 
-      - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if faildelay.so settings exist"
-        community.general.pamd:
-            name: common-auth
-            type: "{{ ubtu20stig_pamd_failock_authfail.type }}"
-            control: "{{ ubtu20stig_pamd_failock_authfail.control }}"
-            module_path: "{{ ubtu20stig_pamd_failock_authfail.module_path }}"
-            new_type: auth
-            new_control: "[default=die]"
-            new_module_path: pam_faillock.so
-            module_arguments: "{{ ubtu20stig_pamd_failock_authfail.auth }}"
-            state: "{{ ubtu20stig_pamd_failock_authfail.state }}"
-        when: ubtu_20_010072_faillock_authfail_state.stdout | length == 0
+      - name: "LOW | UBTU-20-010072 | Run pam-auth-config enable for faillockmain only if '[default=die] pam_faillock.so authfail' is not present"
+        ansible.builtin.command:
+            cmd: /usr/sbin/pam-auth-update --package --enable faillockmain --force
+        when: "'[default=die] pam_faillock.so authfail' not in common_auth_file.content | b64decode"
 
-      - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if no faildelay.so settings"
-        community.general.pamd:
-            name: common-auth
-            type: auth
-            control: sufficient
-            module_path: pam_faillock.so
-            module_arguments: "{{ ubtu20stig_pamd_failock_authsucc.auth }}"
-            state: updated
-        when: ubtu_20_010072_faillock_authsucc_state.stdout | length > 0
-
-      - name: "LOW | UBTU-20-010072 | PATCH | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Set if faildelay.so settings exist"
-        community.general.pamd:
-            name: common-auth
-            type: "{{ ubtu20stig_pamd_failock_authsucc.type }}"
-            control: "{{ ubtu20stig_pamd_failock_authsucc.control }}"
-            module_path: "{{ ubtu20stig_pamd_failock_authsucc.module_path }}"
-            new_type: auth
-            new_control: sufficient
-            new_module_path: pam_faillock.so
-            module_arguments: "{{ ubtu20stig_pamd_failock_authsucc.auth }}"
-            state: "{{ ubtu20stig_pamd_failock_authsucc.state }}"
-        when: ubtu_20_010072_faillock_authsucc_state.stdout | length == 0
-
-      - name: "LOW | UBTU-20-010072 | AUDIT | The Ubuntu operating system must automatically lock an account until the locked account is released by an administrator when three unsuccessful logon attempts have been made. | Update Faillock."
-        ansible.builtin.lineinfile:
-            path: /etc/security/faillock.conf
-            regexp: "{{ item.regexp }}"
-            line: "{{ item.line }}"
-        with_items:
-            - { regexp: '^#?\s*audit', line: 'audit' }
-            - { regexp: '^#?\s*silent', line: 'silent' }
-            - { regexp: '^#?\s*deny', line: 'deny = {{ ubtu20stig_pamd_failock.deny }}' }
-            - { regexp: '^#?\s*fail_interval', line: 'fail_interval = {{ ubtu20stig_pamd_failock.fail_interval }}' }
-            - { regexp: '^#?\s*unlock_time', line: 'unlock_time = {{ ubtu20stig_pamd_failock.unlock_time }}' }
-  when:
-      - ubtu_20_010072
+      - name: "LOW | UBTU-20-010072 | Run pam-auth-config enable for faillockpost only if 'sufficient pam_faillock.so authsucc' is not present"
+        ansible.builtin.command:
+            cmd: /usr/sbin/pam-auth-update --package --enable faillockpost --force
+        when: "'sufficient pam_faillock.so authsucc' not in common_auth_file.content | b64decode"
   tags:
+      - pam
+      - pamd
       - UBTU-20-010072
       - CAT3
       - CCI-000044
@@ -241,7 +203,6 @@
       - SRG-OS-000329-GPOS-00128
       - SV-238235r853414_rule
       - V-238235
-      - pamd
 
 - name: "LOW | UBTU-20-010075 | PATCH | The Ubuntu operating system must enforce a delay of at least 4 seconds between logon prompts following a failed logon attempt."
   block:
