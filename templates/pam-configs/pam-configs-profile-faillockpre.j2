@@ -1,0 +1,11 @@
+{#
+This is a pam-auth-update profile that will install a pam_faillock.so preauth
+line into /etc/pam.d/common-auth.
+#}
+Name: Faillock Preauth
+Default: no
+Priority: 384
+
+Auth-Type: Primary
+Auth:
+        required pam_faillock.so preauth
